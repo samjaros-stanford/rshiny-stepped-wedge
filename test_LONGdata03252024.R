@@ -12,16 +12,17 @@ library (viridis)
 library (shinythemes)
 library (textclean)
 
+####Variable Inputs####
 n_cohort2 <- 4
 cohortSizes2 <- c(20,20,30,20)
 
 IClist2 <- c("Control","IC1","IC2","Sustain")
 n_IC2 <- length(IClist)
 IC_lens2 <- c(1,2,2,1)
+########
 
 
-
-#Note: init_df() account for head to head or ABA designs.
+#Note: init_df() does not account for head to head or ABA designs.
 #Note: init_df() does not customize Condition Durations.
 
 
@@ -79,6 +80,7 @@ f_init_df <- function(n_cohort=n_cohort2,
 
 main_df <- f_init_df(); main_df
 
+####Editable Table####
 customizations_byCohortIC <- data.frame(CohortID=main_df$CohortID,
                                         ConditionName=main_df$ConditionName,
                                         ConditionDurationChange=rep(0,nrow(main_df)),
@@ -86,7 +88,7 @@ customizations_byCohortIC <- data.frame(CohortID=main_df$CohortID,
 
 
 customizations_byCohortIC #User customizes; will update main_df.
-
+########
 
 f_ggplot_df <- function(IC_lens=IC_lens2,
                         df_test=main_df,
@@ -160,9 +162,7 @@ f_ggplot_df <- function(IC_lens=IC_lens2,
 }
 
 
-dfNoNA2 <- f_ggplot_df()
-
-dfNoNA2
+dfNoNA2 <- f_ggplot_df(); dfNoNA2
 
 
 

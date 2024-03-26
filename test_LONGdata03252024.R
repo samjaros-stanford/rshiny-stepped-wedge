@@ -169,26 +169,8 @@ dfNoNA2
 
 
 
+#### GGPLOT SCRIPT FROM APP.R ####
 
-#Seems like Hendricks used a df like this for the ggplot and created it using the matrix. 
-#Maybe we can skip the middle step.
-# dfNoNA2 <- data.frame(xStart = rep(0,n_cohort*n_IC), #int
-#                       xEnd = rep(1,n_cohort*n_IC), #int
-#                       yStart = rep(0,n_cohort*n_IC), #int
-#                       yEnd = rep(1,n_cohort*n_IC), #int
-#                       arrange.colors = rep(viridis::turbo(n_IC),n_cohort), #use gradient
-#                       width = rep(20,n_cohort*n_IC), #int
-#                       theIntervention = rep(IClist,n_cohort) #name
-#                       )
-
-
-
-
-
-
-
-
-# 
 # b <- ggplot( dfNoNA2   ) +
 #   theme_classic ( base_size = 15 )  + labs ( title = "the.main" , x = "xlabText" , y = "ylabText" ) +
 #   geom_segment(data = dfNoNA2 , mapping = aes(  x = xStart , y = yStart, xend = xEnd, yend = yEnd , col = theIntervention  , 
@@ -218,27 +200,3 @@ dfNoNA2
 #   #                                     linetype = 1 , size = 4 )))
 # 
 # b
-
-
-
-# df_default <- data.frame(date_start = rep(date(),n_cohort*n_IC),
-#                          len_ic = rep(1,n_cohort*n_IC),
-#                          len_delayStart = rep(0,n_cohort*n_IC),
-#                          len_delayEnd = rep(0,n_cohort*n_IC),
-#                          isHeadtoHead = rep(F,n_cohort*n_IC)
-#                          )
-# 
-# templist <- templist2 <- templist3 <- c()
-# 
-# for (c in 1:n_cohort){ 
-#   
-#   templist <- c(templist, rep(as.character(c),n_IC)) 
-#   templist2 <- c(templist2, as.character(c(1:n_IC))) 
-#   templist3 <- c(templist3, IClist)
-#   
-# }
-# 
-# df_default$cohort_ID <- templist
-# df_default$ic_ID <- templist2
-# df_default$ic_name <- df_orig$theIntervention <- templist3
-

@@ -90,7 +90,11 @@ customizations_byCohortIC <- data.frame(CohortID=main_df$CohortID,
 customizations_byCohortIC #User customizes; will update main_df.
 ########
 
-f_ggplot_df <- function(IC_lens=IC_lens2,
+f_ggplot_df <- function(n_cohort=n_cohort2,
+                        cohortSizes=cohortSizes2,
+                        IClist=IClist2,
+                        n_IC=n_IC2,
+                        IC_lens=IC_lens2,
                         df_test=main_df,
                         df_cust=customizations_byCohortIC) {
   

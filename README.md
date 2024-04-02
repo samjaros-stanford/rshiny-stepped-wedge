@@ -1,39 +1,42 @@
 # rshiny-stepped-wedge
+
 Visualize a stepped wedge implementation trial
 
-RShiny Task List by Tab:
+**Authors:**
 
-Intervention: General
-- [For Intervention and Graph tabs] Go button. Only update the plot after pressing button.
-- Change text box title "How many implementation conditions are there?" to "Number of Implementation Conditions"
-- *DEBUG* Head to head trials only work if the two conditions that are head to head are listed next to each other above. (IC2 and IC4 cannot go head to head.)
-	Note: This makes sense to me as a user, though this may be a bug we need to fix? I thought of alternatively having a pop-up message say "Error: Head to head conditions are not sequential" if this happens.
-- Change numeric input title "Number of Units" to "Number of input$CohortName" if input$CohortName is not null.
-- Insert numeric input "Number of Sub-Units". Change title to "Number of input$EntityName" if input$EntityName is not null.
-- Confirm ABA design works.
+-   [Samuel Jaros](https://profiles.stanford.edu/sam-jaros)
+-   [Mia Navarro, MS](https://profiles.stanford.edu/mia-navarro)
+-   [Wouter Vermeer, PhD](https://www.feinberg.northwestern.edu/faculty-profiles/az/profile.html?xid=39402)
+-   [C Hendricks Brown, PhD](https://www.feinberg.northwestern.edu/faculty-profiles/az/profile.html?xid=27859)
 
-Intervention: Timing
-- *DEBUG* Durations of Implementation Conditions cannot exceed 4 without breaking.
-- Update Durations of ICs text boxes to also be dynamic, with respect to the number of ICs indicated on Intervention: General (input$num_ICs)
-- Duration of ICs boxes look clunky right now. 
-	Note: This will be addressed if we do the long df.
+**Aims:**
 
-Graph: Settings - none
-- Make row widths dependent on the number of sub-units (e.g., for a cohort of 20 clinics, width should be double that of one with 10.)
-	Note: I don't love this edit, but will show Hendricks it per his request for feedback.
+Produce an interactive web application which:
 
-Graph: Download
-- Add null values for Directory and Base File Name
+-   Encourages the appropriate use of a stepped-wedge trial design in research
 
-ADVANCED
-Note: This is where we will allow people to directly edit the long df.
+-   Is simple to use while remaining customizable
 
-[Not yet created] Home Page
-- Create tab.
-- Home Page with introduction to the app. Select language.
-	Note from Mia: Hendricks was working on building this in other languages. This aspect is likely paused until the app is done.
+-   Produces useful calculations and visualizations to use in the proposal and implementation of a trial
 
-[Not yet created] Power Calculator
-- Create empty tab. To be populated.
-- Go button. Only update the calculation after pressing button.
+**Dependencies:**
 
+This project requires `R` \>= 4.3, `shiny` \>= 1.3.3, and `renv` \>= 1.05. There are other dependencies tracked by `renv` that can be loaded using `renv::restore()`.
+
+**Setup:**
+
+Get the files from this repository by:
+
+-   Run these lines of code in R:
+
+    ```{r}
+    install.packages("usethis")
+    usethis::create_from_github("https://github.com/samjaros-stanford/rshiny-stepped-wedge.git")
+    renv::restore()
+    ```
+
+-   **OR** Create a new project in RStudio from git version control. Use this link as the repository: "<https://github.com/samjaros-stanford/rshiny-stepped-wedge.git>".
+
+-   **OR** Use the green "Code" button above and click "Download ZIP", unpack the files, and move them into your working directory.
+
+Use `renv::restore()` to get the required packages.

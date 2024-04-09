@@ -1,3 +1,7 @@
+
+## Depreciated
+##   New GUI constructed below old GUI to preserve code as a reference
+
 # Define UI for app that simulates Stepped Wedge  ----
 ui <- fluidPage(
   ###:  Open fluidPage  ----
@@ -335,3 +339,45 @@ ui <- fluidPage(
       ) ###: : : Close MainPanel  ----
     )  ###: :  Close sidebarLayout  ----
 )  ###:  Close fluidPage  ----
+
+################################################################################
+## New GUI Definition
+##   Emphasize constructing pages outside of the final function call
+##   Element names should reflect their final position in the GUI
+##   Use comments to break the specs into chunks
+##   Specify from inside to the outside
+
+# ---------- Title ----------
+title = titlePanel()
+
+## ---------- Input tabs ----------
+## Users walk through the tabs in numeric order to construct a study
+## Tabs denoted with a letter are optional offshoots of that numbered tab
+##   offering advanced options
+
+### ---------- Tab 1: Data input ----------
+tab1 = tabPanel()
+### ---------- Tab 1a: Advanced data input ----------
+tab1a = tabPanel()
+### ---------- Tab 2: Output creation ----------
+tab2 = tabPanel()
+### ---------- Tab 2a: Output customization
+tab2a = tabPanel()
+
+## Construct tabset
+##   Users should not see all tabs at once
+##   The tabs contain buttons to navigate through the system
+tabs = tabsetPanel()
+
+# ---------- Sidebar ----------
+sidebar = sidebarPanel(tabs)
+
+# ---------- Main ----------
+main = mainPanel()
+
+# ---------- UI: Page layout ----------
+ui <- fluidPage(
+  # Use first-order elements from above to construct the page
+  title, 
+  sidebarLayout(sidebar, main)
+)

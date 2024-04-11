@@ -16,7 +16,20 @@ library(gridExtra)
 
 options(shiny.fullstacktrace = TRUE)
 
-## --- Create default data --------------------
+## --- Create default data ----------
+default = list()
+
+# Default values for study setup
+default$study$n_intervenions = NA_integer_
+default$study$n_groups = NA_integer_
+default$study$time_units = ""
+default$study$group_units = "Group"
+
+# Default values for visualization setup
+
+
+
+## --- Old default data ----------
 LoadSavedInputValues <- FALSE
 
 all.my.files <- list.files() 

@@ -1,3 +1,18 @@
+################################################################################
+# UI Elements that need to be declared with the server
+
+### Cohort Setup Tab -----------------------------------------------------------
+### Contains another tabset, 1 tab for each cohort
+cohort_tab <- tabPanel(
+  title = "Cohorts",
+  value = "tab_cohort",
+  helpText("Customize the interventions for each cohort."),
+  tabsetPanel(
+    tabPanel("C1",value="ctab_1",helpText("C1")),
+    tabPanel("C2",value="ctab_2",helpText("C2"))
+  )
+)
+
 
 ################################################################################
 # New Server
@@ -7,44 +22,36 @@ server <- function(input, output){
   # Tab Functionality ==========================================================
   ## --- Next ---
   observeEvent(input$tab1_next, {
-    goto_tab = "tab2"
-    if(input$is_head_to_head){
-      goto_tab = "tab1b"
-    }
-    updateTabsetPanel(inputId = "input_tabs", selected = goto_tab)
-  })
-  observeEvent(input$tab1a_next, {
     updateTabsetPanel(inputId = "input_tabs", selected = "tab2")
   })
-  observeEvent(input$tab1b_next, {
-    updateTabsetPanel(inputId = "input_tabs", selected = "tab2")
+  observeEvent(input$tab2_next, {
+    updateTabsetPanel(inputId = "input_tabs", selected = "tab3")
+  })
+  observeEvent(input$tab3_next, {
+    updateTabsetPanel(inputId = "input_tabs", selected = "tab4")
   })
   ## --- Back ---
-  observeEvent(input$tab1a_back, {
-    updateTabsetPanel(inputId = "input_tabs", selected = "tab1")
-  })
-  observeEvent(input$tab1b_back, {
-    updateTabsetPanel(inputId = "input_tabs", selected = "tab1")
-  })
   observeEvent(input$tab2_back, {
-    goto_tab = "tab1"
-    if(input$is_head_to_head){
-      goto_tab = "tab1b"
-    }
-    updateTabsetPanel(inputId = "input_tabs", selected = goto_tab)
+    updateTabsetPanel(inputId = "input_tabs", selected = "tab1")
   })
-  observeEvent(input$tab2a_back, {
+  observeEvent(input$tab3_back, {
     updateTabsetPanel(inputId = "input_tabs", selected = "tab2")
   })
-  ## --- Advanced ---
-  observeEvent(input$advanced_input, {
-    updateTabsetPanel(inputId = "input_tabs", selected = "tab1a")
+  observeEvent(input$tab4_back, {
+    updateTabsetPanel(inputId = "input_tabs", selected = "tab3")
   })
-  observeEvent(input$advanced_viz, {
-    updateTabsetPanel(inputId = "input_tabs", selected = "tab2a")
+  ## --- Advanced ---
+  observeEvent(input$advanced_cohort, {
+    if(input$advanced_cohort > 1){
+      updateTabsetPanel(inputId = "input_tabs", selected = "tab_cohort")
+    } else {
+      appendTab(inputId = "input_tabs", cohort_tab, select = T)
+    }
   })
   
   # Dynamic UI Elements ========================================================
+  ## --- Intervention Naming ---
+  ## Creates a number of text inputs equal to the number of interventions
   output$intervention_names <- renderUI({
     n_int = as.integer(input$n_interventions)
     if(is.na(n_int) | n_int<1){
@@ -55,8 +62,29 @@ server <- function(input, output){
              textInput(
                inputId = paste0("intervention_name_", i),
                label = paste0("Name of intervention ", i),
-               value = NA_character_,
-               placeholder = paste0("Intervention ", i)
+               value = input[[paste0("intervention_name_",i)]]
+             )
+           })
+  })
+  
+  ## --- Intervention Timing ---
+  ## Creates a number of duration inputs equal to the number of interventions
+  output$intervention_timings <- renderUI({
+    n_int = as.integer(input$n_interventions)
+    if(is.na(n_int) | n_int<1){
+      return(helpText("Number of interventions is invalid"))
+    }
+    lapply(1:as.integer(input$n_interventions),
+           function(i) {
+             this_name = ifelse(input[[paste0("intervention_name_",i)]]=="",
+                                paste0("Intervention ",i),
+                                input[[paste0("intervention_name_",i)]])
+             numericInput(
+               inputId = paste0("intervention_length_", i),
+               label = this_name,
+               value = ifelse(is.na(input[[paste0("intervention_length_",i)]]),
+                              NA_integer_,
+                              input[[paste0("intervention_length_",i)]])
              )
            })
   })

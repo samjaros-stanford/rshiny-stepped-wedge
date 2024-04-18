@@ -29,7 +29,8 @@ backButton <- function(id) {
 # Title ========================================================================
 title <- titlePanel(
   list(h1("Stepped Wedge Trial Emulator"),
-       "Follow the input prompts to simulate a stepped wedge trial")
+       "Follow the input prompts to simulate a stepped wedge trial",
+       HTML("<br><br>"))
 )
 
 ## Input tabs ==================================================================
@@ -38,17 +39,20 @@ title <- titlePanel(
 ## Tabs denoted with a letter are optional offshoots of that numbered tab
 ##   offering advanced options
 
-### Tab 1: Initial input -------------------------------------------------------
+### Tab 1: Trial Skeleton ------------------------------------------------------
 ### Input basic numbers that allows the code to construct a very basic stepwise
 ###   trial. Naming and tweaking occurs in subsequent menus
-tab1 <- tabPanelBody(
+tab1 <- tabPanel(
+  title = "1. Trial",
   value = "tab1",
+  helpText("This basic information will construct your initial trial. Return to
+           this tab if you need to add more interventions or cohorts."),
   numericInput(
     inputId = "n_interventions",
     label = "How many interventions in your study?",
     value = default$study$n_interventions,
     min = 1,
-    max = 256,
+    max = 16,
     step = 1
   ),
   numericInput(
@@ -56,69 +60,59 @@ tab1 <- tabPanelBody(
     label = "How many participant groups in your study?",
     value = default$study$n_groups,
     min = 1,
-    max = 256,
+    max = 32,
     step = 1
   ),
+  ### --- Page actions
+  ### Invisible button for alignment
+  ### There is no back since this is the first page (for now)
+  actionButton(
+    "blank", 
+    "",
+    class = "invisible"),
+  nextButton("tab1_next")
+)
+### Tab 2: Naming --------------------------------------------------------------
+tab2 <- tabPanel(
+  title = "2. Names",
+  value = "tab2",
+  helpText("Provide names that will be used for the data input and plotting."),
   textInput(
     inputId = "time_units",
     label = "What are the time units for your study?",
     value = default$study$time_units
   ),
-  checkboxInput(
-    inputId = "is_head_to_head",
-    label = "Includes head-to-head intervention(s)"
-  ),
-  ### --- Page actions
-  ### There is no back since this is the default page (for now)
-  ### Advanced input presents the custom input tool
-  actionLink(
-    inputId = "advanced_input",
-    label = "Advanced Input"
-  ),
-  nextButton("tab1_next")
-)
-### Tab 1a: Advanced data input ------------------------------------------------
-tab1a <- tabPanelBody(
-  value = "tab1a",
-  helpText("This is where you will be able to paste the series of numbers and
-           tabs that the old document could handle"),
-  backButton("tab1a_back"),
-  nextButton("tab1a_next")
-)
-### Tab 1b: Head-to-head trial -------------------------------------------------
-tab1b <- tabPanelBody(
-  value = "tab1b",
-  helpText("tab1b"),
-  backButton("tab1b_back"),
-  nextButton("tab1b_next")
-)
-### Tab 2: Input naming --------------------------------------------------------
-tab2 <- tabPanelBody(
-  value = "tab2",
-  helpText("Tab 2"),
   uiOutput("intervention_names"),
-  ### Advanced viz presents the custom viz tool
-  actionLink(
-    inputId = "advanced_viz",
-    label = "Advanced Visualization"
-  ),
-  actionButton(
-    inputId = "tab2_back",
-    label = "Back",
-    icon = icon("arrow-left"),
-    class = "rightAlign"
-  )
+  ### --- Page actions
+  backButton("tab2_back"),
+  nextButton("tab2_next")
 )
-### Tab 2a: Output customization -----------------------------------------------
-tab2a <- tabPanelBody(
-  value = "tab2a",
-  helpText("Tab 2a"),
+### Tab 3: Tailoring -----------------------------------------------------------
+tab3 <- tabPanel(
+  title = "3. Timing",
+  value = "tab3",
+  helpText("Provide the duration of each intervention."),
+  uiOutput("intervention_timings"),
+  ### --- Page actions
+  actionLink(
+    inputId = "advanced_cohort",
+    label = "Edit Interventions by Cohort"
+  ),
+  HTML("<br>"),
+  backButton("tab3_back"),
+  nextButton("tab3_next")
+)
+### Tab 4: Visualization -------------------------------------------------------
+tab4 <- tabPanel(
+  title = "4. Plot",
+  value = "tab4",
+  helpText("Customize the plotting and save your figure."),
   ### --- Page actions
   ### There is no next since this is the last page (for now)
-  ### Back returns to the basic viz page
-  backButton("tab2a_back")
+  backButton("tab4_back")
 )
-### Tab 2b: Study customization ------------------------------------------------
+### Cohort Setup Tab -----------------------------------------------------------
+### Declared in server.R for showTab functionality
 
 ## Construct tabset
 ##   Users should not see all tabs at once
@@ -126,12 +120,11 @@ tab2a <- tabPanelBody(
 tabs <- tabsetPanel(
   id = "input_tabs",
   selected = "tab1",
-  type = "hidden",
+  type = "pills",
   tab1, 
-  tab1a,
-  tab1b,
-  tab2, 
-  tab2a
+  tab2,
+  tab3,
+  tab4
 )
 
 # Sidebar ======================================================================
@@ -146,8 +139,9 @@ main <- mainPanel(
 
 # UI: Page layout ==============================================================
 ui <- fluidPage(
-  # Enable right justification
-  tags$head(tags$style(".rightAlign{float:right;}")),
+  # Enable right justification and invisibility
+  tags$head(tags$style(".rightAlign{float:right;}
+                        .invisible{position:none;}")),
   # Use first-order elements from above to construct the page
   title, 
   sidebarLayout(sidebar, main)

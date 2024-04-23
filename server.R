@@ -1,16 +1,13 @@
 ################################################################################
-# UI Elements that need to be declared with the server
-
+# UI Elements that need to be declared with the server for compatability with
+#   apendTab/prependTab
 ### Cohort Setup Tab -----------------------------------------------------------
 ### Contains another tabset, 1 tab for each cohort
 cohort_tab <- tabPanel(
   title = "Cohorts",
   value = "tab_cohort",
   helpText("Customize the interventions for each cohort."),
-  tabsetPanel(
-    tabPanel("C1",value="ctab_1",helpText("C1")),
-    tabPanel("C2",value="ctab_2",helpText("C2"))
-  )
+  uiOutput("cohort_customization")
 )
 
 
@@ -62,6 +59,7 @@ server <- function(input, output){
              textInput(
                inputId = paste0("intervention_name_", i),
                label = paste0("Name of intervention ", i),
+               # Use the existing input as the default value
                value = input[[paste0("intervention_name_",i)]]
              )
            })
@@ -74,19 +72,58 @@ server <- function(input, output){
     if(is.na(n_int) | n_int<1){
       return(helpText("Number of interventions is invalid"))
     }
-    lapply(1:as.integer(input$n_interventions),
+    lapply(1:n_int,
            function(i) {
+             # If the intervention names are blank, fill in placeholder names
              this_name = ifelse(input[[paste0("intervention_name_",i)]]=="",
                                 paste0("Intervention ",i),
                                 input[[paste0("intervention_name_",i)]])
              numericInput(
                inputId = paste0("intervention_length_", i),
                label = this_name,
+               # Use the existing input as the default
                value = ifelse(is.na(input[[paste0("intervention_length_",i)]]),
                               NA_integer_,
                               input[[paste0("intervention_length_",i)]])
              )
            })
+  })
+  
+  ## --- Cohort Customizations ---
+  ## Generates the cohort customization tabset
+  output$cohort_customization <- renderUI({
+    n_groups = as.integer(input$n_groups)
+    # Return help text if the group numbers are invalid
+    if(is.na(n_groups) | n_groups<1){
+      return(helpText("Number of groups is invalid"))
+    }
+    # Generate a tabset with a dynamic number of tabs
+    # tabsetPanel() needs tabPanels as the inputs, not a list
+    # Workaround is using do.call() with all of the arguments in a list
+    do.call(
+      tabsetPanel,
+      append(
+        list(
+          id = "cohort_tabs",
+          selected = "cohort1",
+          type = "pills"
+        ),
+        lapply(1:n_groups,
+               function(i){
+                 tabPanel(
+                   title = i,
+                   value = paste0("cohort",i),
+                   textInput(
+                     inputId = paste0("cohort_name_", i),
+                     label = paste0("Name of cohort ", i),
+                     # Use the existing input as the default value
+                     value = input[[paste0("cohort_name_",i)]]
+                   )
+                 )
+               }
+        )
+      )
+    )
   })
   
   # Temp for Testing ===========================================================

@@ -1,17 +1,4 @@
 ################################################################################
-# UI Elements that need to be declared with the server for compatability with
-#   apendTab/prependTab
-### Cohort Setup Tab -----------------------------------------------------------
-### Contains another tabset, 1 tab for each cohort
-cohort_tab <- tabPanel(
-  title = "Cohorts",
-  value = "tab_cohort",
-  helpText("Customize the interventions for each cohort."),
-  uiOutput("cohort_customization")
-)
-
-
-################################################################################
 # New Server
 #  For now, just prints out the list provided by the input
 
@@ -38,63 +25,85 @@ server <- function(input, output){
     updateTabsetPanel(inputId = "input_tabs", selected = "tab3")
   })
   ## --- Advanced ---
-  observeEvent(input$advanced_cohort, {
-    if(input$advanced_cohort > 1){
-      updateTabsetPanel(inputId = "input_tabs", selected = "tab_cohort")
+  observeEvent(input$advanced_COH, {
+    if(input$advanced_COH > 1){
+      updateTabsetPanel(inputId = "input_tabs", selected = "tab_COH")
     } else {
-      appendTab(inputId = "input_tabs", cohort_tab, select = T)
+      appendTab(inputId = "input_tabs",
+                # Add tabPanel for cohort customization
+                tabPanel(
+                  title = "Cohorts",
+                  value = "tab_COH",
+                  helpText("Customize the interventions for each cohort."),
+                  uiOutput("COH_customization")
+                ),
+                select = T)
     }
   })
   
   # Dynamic UI Elements ========================================================
   ## --- Intervention Naming ---
   ## Creates a number of text inputs equal to the number of interventions
-  output$intervention_names <- renderUI({
-    n_int = as.integer(input$n_interventions)
+  output$INT_names <- renderUI({
+    n_int = as.integer(input$n_INT)
     if(is.na(n_int) | n_int<1){
       return(helpText("Number of interventions is invalid"))
     }
-    lapply(1:as.integer(input$n_interventions),
+    lapply(1:as.integer(input$n_INT),
            function(i) {
              textInput(
-               inputId = paste0("intervention_name_", i),
+               inputId = paste0("INT_name_", i),
                label = paste0("Name of intervention ", i),
                # Use the existing input as the default value
-               value = input[[paste0("intervention_name_",i)]]
+               value = input[[paste0("INT_name_",i)]]
              )
            })
   })
-  
   ## --- Intervention Timing ---
   ## Creates a number of duration inputs equal to the number of interventions
-  output$intervention_timings <- renderUI({
-    n_int = as.integer(input$n_interventions)
-    if(is.na(n_int) | n_int<1){
+  output$INT_timings <- renderUI({
+    if(is.na(input$n_INT) | input$n_INT<1){
       return(helpText("Number of interventions is invalid"))
     }
-    lapply(1:n_int,
-           function(i) {
-             # If the intervention names are blank, fill in placeholder names
-             this_name = ifelse(input[[paste0("intervention_name_",i)]]=="",
-                                paste0("Intervention ",i),
-                                input[[paste0("intervention_name_",i)]])
-             numericInput(
-               inputId = paste0("intervention_length_", i),
-               label = this_name,
-               # Use the existing input as the default
-               value = ifelse(is.na(input[[paste0("intervention_length_",i)]]),
-                              NA_integer_,
-                              input[[paste0("intervention_length_",i)]])
-             )
-           })
+    append(
+      list(fluidRow(
+        column(width=4,
+               numericInput(
+                 inputId = "INT_start_max",
+                 label = "Start Max",
+                 # Use the existing input as the default
+                 value = ifelse(is.na(input$INT_start_max),
+                                default$study$INT_start_max,
+                                input$INT_start_max)
+               )),
+        column(width=4,
+               numericInput(
+                 inputId = "INT_offset",
+                 label = "Offset",
+                 # Use the existing input as the default
+                 value = ifelse(is.na(input$INT_offset),
+                                default$study$INT_offset,
+                                input$INT_offset)
+               )),
+        column(width=4,
+               numericInput(
+                 inputId = "INT_end_max",
+                 label = "End Max",
+                 # Use the existing input as the default
+                 value = ifelse(is.na(input$INT_end_max),
+                                default$study$INT_end_max,
+                                input$INT_end_max)
+               ))
+      )),
+      lapply(1:input$n_INT, make_INT_timing_ui, input)
+    )
   })
-  
   ## --- Cohort Customizations ---
   ## Generates the cohort customization tabset
-  output$cohort_customization <- renderUI({
-    n_groups = as.integer(input$n_groups)
+  output$COH_customization <- renderUI({
+    n_COH = as.integer(input$n_COH)
     # Return help text if the group numbers are invalid
-    if(is.na(n_groups) | n_groups<1){
+    if(is.na(n_COH) | n_COH<1){
       return(helpText("Number of groups is invalid"))
     }
     # Generate a tabset with a dynamic number of tabs
@@ -104,20 +113,20 @@ server <- function(input, output){
       tabsetPanel,
       append(
         list(
-          id = "cohort_tabs",
-          selected = "cohort1",
+          id = "COH_tabs",
+          selected = "COH_1",
           type = "pills"
         ),
-        lapply(1:n_groups,
+        lapply(1:n_COH,
                function(i){
                  tabPanel(
                    title = i,
-                   value = paste0("cohort",i),
+                   value = paste0("COH_",i),
                    textInput(
-                     inputId = paste0("cohort_name_", i),
+                     inputId = paste0("COH_name_", i),
                      label = paste0("Name of cohort ", i),
                      # Use the existing input as the default value
-                     value = input[[paste0("cohort_name_",i)]]
+                     value = input[[paste0("COH_name_",i)]]
                    )
                  )
                }
@@ -125,6 +134,64 @@ server <- function(input, output){
       )
     )
   })
+  
+  # Study Creation =============================================================
+  # Dynamically observe intervention lengths based on the number of
+  #   intervention lengths, assigning them a value of 0 if uninitialized
+  INT_config <- reactive({
+    data.frame(INT = 1:input$n_INT,
+               INT_length = sapply(1:input$n_INT, function(i){
+                 len <- input[[paste0("INT_length_",i)]]
+                 if(is.null(len)){
+                   0
+                 } else {
+                   len
+                 }}),
+               INT_gap = sapply(1:input$n_INT, function(i){
+                 gap <- input[[paste0("INT_gap_",i)]]
+                 if(is.null(gap)){
+                   0
+                 } else {
+                   gap
+                 }}),
+               # Offset has special case where if it is completely uninitialized,
+               #   it needs to be 0/NA so that a phantom study is not created.
+               #   If it has been initialized but the user has not set the
+               #   value, it can be assumed to have the default offset.
+               INT_offset = ifelse(is.null(input$INT_offset),
+                                   default$study$INT_null_offset,
+                                   ifelse(is.na(input$INT_offset),
+                                          default$study$INT_offset,
+                                          input$INT_offset)),
+               INT_start_max = ifelse(is.null(input$INT_start_max) || is.na(input$INT_start_max),
+                                      default$study$INT_start_max,
+                                      input$INT_start_max),
+               INT_end_max = ifelse(is.null(input$INT_end_max) || is.na(input$INT_end_max),
+                                    default$study$INT_end_max,
+                                    input$INT_end_max)
+    )
+  })
+  # Create study specification with intervention start/stop times
+  #   study is a reactive function to cut down on computational workload
+  #   This prevents the study from being recalculated when only visualization
+  #   parameters have changed.
+  study <- reactive({
+    # --- Exceptions ---
+    if(is.na(input$n_INT) | is.na(input$n_COH)){
+      return(NULL)
+    }
+    # --- Assemble study spec ---
+    if(input$advanced_COH > 0 & F){ # Construct separately by cohort, & F to disable for now
+      base_study <- data.frame()
+    } else {
+      print(INT_config())
+      base_study <- data.frame(COH = 1:input$n_COH) %>%
+        cross_join(INT_config())
+    }
+    # --- Call construction function ---
+    generate_study(base_study)
+  })
+  
   
   # Temp for Testing ===========================================================
   # Returns a text of all input values
@@ -136,4 +203,6 @@ server <- function(input, output){
     }
     out_string
   })
+  # Returns study construction
+  output$study <- renderTable(study())
 }

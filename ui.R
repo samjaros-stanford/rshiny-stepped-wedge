@@ -48,17 +48,17 @@ tab1 <- tabPanel(
   helpText("This basic information will construct your initial trial. Return to
            this tab if you need to add more interventions or cohorts."),
   numericInput(
-    inputId = "n_interventions",
+    inputId = "n_INT",
     label = "How many interventions in your study?",
-    value = default$study$n_interventions,
+    value = default$study$n_INT,
     min = 1,
     max = 16,
     step = 1
   ),
   numericInput(
-    inputId = "n_groups",
+    inputId = "n_COH",
     label = "How many participant groups in your study?",
-    value = default$study$n_groups,
+    value = default$study$n_COH,
     min = 1,
     max = 32,
     step = 1
@@ -82,7 +82,7 @@ tab2 <- tabPanel(
     label = "What are the time units for your study?",
     value = default$study$time_units
   ),
-  uiOutput("intervention_names"),
+  uiOutput("INT_names"),
   ### --- Page actions
   backButton("tab2_back"),
   nextButton("tab2_next")
@@ -92,10 +92,10 @@ tab3 <- tabPanel(
   title = "3. Timing",
   value = "tab3",
   helpText("Provide the duration of each intervention."),
-  uiOutput("intervention_timings"),
+  uiOutput("INT_timings"),
   ### --- Page actions
   actionLink(
-    inputId = "advanced_cohort",
+    inputId = "advanced_COH",
     label = "Edit Interventions by Cohort"
   ),
   HTML("<br>"),
@@ -112,7 +112,7 @@ tab4 <- tabPanel(
   backButton("tab4_back")
 )
 ### Cohort Setup Tab -----------------------------------------------------------
-### Declared in server.R for showTab functionality
+### Declared in 1_dynamic_ui.R for showTab functionality
 
 ## Construct tabset
 ##   Users should not see all tabs at once
@@ -133,6 +133,7 @@ sidebar <- sidebarPanel(tabs)
 # Main =========================================================================
 main <- mainPanel(
   verbatimTextOutput("input_list"), # For testing
+  tableOutput("study"), # For testing
   plotOutput("plot"),
   textOutput("save_status")
 )

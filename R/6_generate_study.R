@@ -3,6 +3,15 @@
 # 
 # Generate a stepwise wedge study given study configuration
 # 
+# base_study - data frame with study cohort configuration
+#   Required columns:
+#     COH - Cohort ID
+#     INT - Intervention ID
+#     INT_length - Intervention length
+#     INT_gap - Gap before this row's intervention
+#     INT_offset - Time units by which study should be stepped
+#     INT_start_max - Maximum length for all first interventions
+#     INT_end_max - Maximum length for all last interventions
 generate_study <- function(base_study){
   #-----------------------------------------------------------------------------
   # Input checks
@@ -56,9 +65,9 @@ generate_study <- function(base_study){
     #   the max length of the intervention
     mutate(INT_start = INT_gap + prev_INT_end,
            INT_end = suppressWarnings(
-             min(study_end, INT_start + INT_end_max))) %>%
+             min(study_end, INT_start + INT_length + INT_end_max))) %>%
     select(COH, INT, INT_start, INT_end)
-  
+
   rbind(not_last_INT, last_INT) %>%
     arrange(COH, INT)
 }
@@ -67,10 +76,12 @@ generate_study <- function(base_study){
 # Testing
 
 # base_study <- data.frame(COH = 1:4) %>%
-#   cross_join(data.frame(INT = 1:3, 
+#   cross_join(data.frame(INT = 1:3,
 #                         INT_length = c(1,2,3),
 #                         INT_offset = 1,
-#                         INT_gap = c(0,0,0)))
+#                         INT_gap = c(0,0,0),
+#                         INT_start_max = 1,
+#                         INT_end_max = 3))
 # 
-# generate_study(base_study=base_study, start_max=2, end_max=Inf)
+# generate_study(base_study=base_study)
   

@@ -184,7 +184,6 @@ server <- function(input, output){
     if(input$advanced_COH > 0 & F){ # Construct separately by cohort, & F to disable for now
       base_study <- data.frame()
     } else {
-      print(INT_config())
       base_study <- data.frame(COH = 1:input$n_COH) %>%
         cross_join(INT_config())
     }
@@ -192,7 +191,15 @@ server <- function(input, output){
     generate_study(base_study)
   })
   
-  
+  # Plotting ===================================================================
+  output$plot <- renderPlot({
+    # Fail states
+    if(is.na(input$n_INT) | is.na(input$n_COH)){
+      return(NULL)
+    }
+    # Call plotting
+    make_plot(study())
+  })
   # Temp for Testing ===========================================================
   # Returns a text of all input values
   output$input_list <- renderText({

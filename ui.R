@@ -132,9 +132,9 @@ sidebar <- sidebarPanel(tabs)
 
 # Main =========================================================================
 main <- mainPanel(
-  verbatimTextOutput("input_list"), # For testing
-  tableOutput("study"), # For testing
   plotOutput("plot"),
+  tableOutput("study"), # For testing
+  verbatimTextOutput("input_list"), # For testing
   textOutput("save_status")
 )
 

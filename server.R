@@ -45,58 +45,32 @@ server <- function(input, output){
   ## --- Intervention Naming ---
   ## Creates a number of text inputs equal to the number of interventions
   output$INT_names <- renderUI({
-    n_int = as.integer(input$n_INT)
+    # Isolated values will only be recalculated if the tab changes
+    input$input_tabs
+    n_int = as.integer(isolate(input$n_INT))
     if(is.na(n_int) | n_int<1){
       return(helpText("Number of interventions is invalid"))
     }
-    lapply(1:as.integer(input$n_INT),
-           function(i) {
-             textInput(
-               inputId = paste0("INT_name_", i),
-               label = paste0("Name of intervention ", i),
-               # Use the existing input as the default value
-               value = input[[paste0("INT_name_",i)]]
-             )
-           })
+    isolate(make_INT_name_ui(n_int, input))
   })
   ## --- Intervention Timing ---
   ## Creates a number of duration inputs equal to the number of interventions
   output$INT_timings <- renderUI({
-    if(is.na(input$n_INT) | input$n_INT<1){
+    # Isolated values will only be recalculated if the tab or number changes
+    input$input_tabs
+    n_int = as.integer(input$n_INT)
+    if(is.na(n_int) | n_int<1){
       return(helpText("Number of interventions is invalid"))
     }
-    append(
-      list(fluidRow(
-        column(width=4,
-               numericInput(
-                 inputId = "INT_start_max",
-                 label = "Start Max",
-                 # Use the existing input as the default
-                 value = ifelse(is.na(input$INT_start_max),
-                                default$study$INT_start_max,
-                                input$INT_start_max)
-               )),
-        column(width=4,
-               numericInput(
-                 inputId = "INT_offset",
-                 label = "Offset",
-                 # Use the existing input as the default
-                 value = ifelse(is.na(input$INT_offset),
-                                default$study$INT_offset,
-                                input$INT_offset)
-               )),
-        column(width=4,
-               numericInput(
-                 inputId = "INT_end_max",
-                 label = "End Max",
-                 # Use the existing input as the default
-                 value = ifelse(is.na(input$INT_end_max),
-                                default$study$INT_end_max,
-                                input$INT_end_max)
-               ))
-      )),
-      lapply(1:input$n_INT, make_INT_timing_ui, input)
-    )
+    c(isolate(make_INT_timing_ui(n_int, input)),
+      list(
+        hr(),
+        numericInput(
+          inputId = "INT_offset",
+          label = "Intervention Offset Between Groups",
+          value = ifelse(is.null(input$INT_offset),
+                         default$study$INT_offset,
+                         input$INT_offset))))
   })
   ## --- Cohort Customizations ---
   ## Generates the cohort customization tabset
@@ -194,7 +168,7 @@ server <- function(input, output){
   # Plotting ===================================================================
   output$plot <- renderPlot({
     # Fail states
-    if(is.na(input$n_INT) | is.na(input$n_COH)){
+    if(!do.plot | is.na(input$n_INT) | is.na(input$n_COH)){
       return(NULL)
     }
     # Call plotting

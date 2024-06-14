@@ -84,7 +84,7 @@ make_INT_timing_ui <- function(n_INT, input){
                inputId = paste0("INT_gap_", n_INT),
                label = "Delay Before",
                value = ifelse(is.null(input[[paste0("INT_length_", n_INT)]]),
-                              default$study$INT_length,
+                              default$study$INT_gap,
                               input[[paste0("INT_length_", n_INT)]])
              )),
            column(

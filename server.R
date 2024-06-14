@@ -64,7 +64,6 @@ server <- function(input, output){
     }
     c(isolate(make_INT_timing_ui(n_int, input)),
       list(
-        hr(),
         numericInput(
           inputId = "INT_offset",
           label = "Intervention Offset Between Groups",
@@ -113,30 +112,31 @@ server <- function(input, output){
   # Dynamically observe intervention lengths based on the number of
   #   intervention lengths, assigning them a value of 0 if uninitialized
   INT_config <- reactive({
+    # --- Exceptions ---
+    # Stop if intervention number is uninitialized
+    # Stop if offset is uninitialized (timing tab uninitialized)
+    if(is.na(input$n_INT) | is.null(input$INT_offset)){
+      return(NULL)
+    }
+    
     data.frame(INT = 1:input$n_INT,
-               INT_length = sapply(1:input$n_INT, function(i){
-                 len <- input[[paste0("INT_length_",i)]]
-                 if(is.null(len)){
-                   0
-                 } else {
-                   len
-                 }}),
-               INT_gap = sapply(1:input$n_INT, function(i){
-                 gap <- input[[paste0("INT_gap_",i)]]
-                 if(is.null(gap)){
-                   0
-                 } else {
-                   gap
-                 }}),
+               INT_length = sapply(
+                 1:input$n_INT, 
+                 function(i){
+                   input[[paste0("INT_length_",i)]]
+                 }),
+               INT_gap = sapply(
+                 1:input$n_INT, 
+                 function(i){
+                  input[[paste0("INT_gap_",i)]]
+                 }),
                # Offset has special case where if it is completely uninitialized,
                #   it needs to be 0/NA so that a phantom study is not created.
                #   If it has been initialized but the user has not set the
                #   value, it can be assumed to have the default offset.
-               INT_offset = ifelse(is.null(input$INT_offset),
+               INT_offset = ifelse(is.na(input$INT_offset),
                                    default$study$INT_null_offset,
-                                   ifelse(is.na(input$INT_offset),
-                                          default$study$INT_offset,
-                                          input$INT_offset)),
+                                   input$INT_offset),
                INT_start_max = ifelse(is.null(input$INT_start_max) || is.na(input$INT_start_max),
                                       default$study$INT_start_max,
                                       input$INT_start_max),
@@ -151,7 +151,7 @@ server <- function(input, output){
   #   parameters have changed.
   study <- reactive({
     # --- Exceptions ---
-    if(is.na(input$n_INT) | is.na(input$n_COH)){
+    if(is.na(input$n_COH) | is.null(INT_config())){
       return(NULL)
     }
     # --- Assemble study spec ---
@@ -168,7 +168,7 @@ server <- function(input, output){
   # Plotting ===================================================================
   output$plot <- renderPlot({
     # Fail states
-    if(!do.plot | is.na(input$n_INT) | is.na(input$n_COH)){
+    if(!do.plot | is.null(study())){
       return(NULL)
     }
     # Call plotting
@@ -177,6 +177,11 @@ server <- function(input, output){
   # Temp for Testing ===========================================================
   # Returns a text of all input values
   output$input_list <- renderText({
+    # Check if this is wanted
+    if(!do.debug){
+      return(NULL)
+    }
+    
     input_names = names(reactiveValuesToList(input))
     out_string = ""
     for(name in input_names){
@@ -184,6 +189,22 @@ server <- function(input, output){
     }
     out_string
   })
+  # Returns config passed to study constructor
+  output$config <- renderTable({
+    # Check if this is wanted
+    if(!(do.table | do.debug)){
+      return(NULL)
+    }
+    
+    INT_config()
+  })
   # Returns study construction
-  output$study <- renderTable(study())
+  output$study <- renderTable({
+    # Check if this is wanted
+    if(!(do.table | do.debug)){
+      return(NULL)
+    }
+    
+    study()
+  })
 }

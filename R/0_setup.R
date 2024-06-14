@@ -11,7 +11,9 @@ library(purrr)
 max_n_INT = 16
 max_n_COH = 16
 ## Debugging
+do.debug = F
 do.plot = T
+do.table = F
 
 # Shiny Options ================================================================
 options(shiny.fullstacktrace = TRUE)

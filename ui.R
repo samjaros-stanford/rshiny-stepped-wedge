@@ -57,7 +57,7 @@ tab1 <- tabPanel(
   ),
   numericInput(
     inputId = "n_COH",
-    label = "How many participant groups in your study?",
+    label = "How many cohorts are your study?",
     value = default$study$n_COH,
     min = 1,
     max = 32,
@@ -133,8 +133,17 @@ sidebar <- sidebarPanel(tabs)
 # Main =========================================================================
 main <- mainPanel(
   plotOutput("plot"),
-  tableOutput("study"), # For testing
-  verbatimTextOutput("input_list"), # For testing
+  # --- For testing ---
+  fluidRow(
+    column(
+      width = 6,
+      tableOutput("config")),
+    column(
+      width = 6,
+      tableOutput("study"))
+    ), 
+  # --- For testing ---
+  verbatimTextOutput("input_list"),
   textOutput("save_status")
 )
 

@@ -31,11 +31,11 @@ make_INT_timing_ui <- function(n_INT, input){
              )),
       column(width = 4,
              numericInput(
-               inputId = "INT_start_min",
+               inputId = "INT_length_1",
                label = "Min Duration",
-               value = ifelse(is.null(input$INT_start_min),
+               value = ifelse(is.null(input$INT_length_1),
                               default$study$INT_length,
-                              input$INT_start_min)
+                              input$INT_length_1)
              )),
       column(width = 4,
              numericInput(
@@ -49,7 +49,6 @@ make_INT_timing_ui <- function(n_INT, input){
     sapply(
       2:(n_INT - 1),
       function(i){
-        print(paste0("INT ", i))
         list(
           tags$u(strong(ifelse(input[[paste0("INT_name_", i)]] == "",
                                paste0("Intervention ", i),
@@ -62,7 +61,8 @@ make_INT_timing_ui <- function(n_INT, input){
                 label = "Delay Before",
                 value = ifelse(is.null(input[[paste0("INT_gap_", i)]]),
                                default$study$INT_gap,
-                               input[[paste0("INT_gap_", i)]]))),
+                               input[[paste0("INT_gap_", i)]])
+              )),
             column(
               width = 6,
               numericInput(
@@ -70,10 +70,11 @@ make_INT_timing_ui <- function(n_INT, input){
                 label = "Duration",
                 value = ifelse(is.null(input[[paste0("INT_length_", i)]]),
                                default$study$INT_length,
-                               input[[paste0("INT_length_", i)]])))
-            )
+                               input[[paste0("INT_length_", i)]])
+              ))
           )
-        }),
+        )
+      }),
     list(tags$u(strong(ifelse(input[[paste0("INT_name_", n_INT)]] == "",
                               paste0("Intervention ", n_INT),
                               input[[paste0("INT_name_", n_INT)]]))),
@@ -83,18 +84,18 @@ make_INT_timing_ui <- function(n_INT, input){
              numericInput(
                inputId = paste0("INT_gap_", n_INT),
                label = "Delay Before",
-               value = ifelse(is.null(input[[paste0("INT_length_", n_INT)]]),
+               value = ifelse(is.null(input[[paste0("INT_gap_", n_INT)]]),
                               default$study$INT_gap,
-                              input[[paste0("INT_length_", n_INT)]])
+                              input[[paste0("INT_gap_", n_INT)]])
              )),
            column(
              width = 4,
              numericInput(
-               inputId = "INT_end_min",
+               inputId = paste0("INT_length_", n_INT),
                label = "Min Duration",
-               value = ifelse(is.null(input$INT_end_min),
+               value = ifelse(is.null(input[[paste0("INT_length_", n_INT)]]),
                               default$study$INT_length,
-                              input$INT_end_min)
+                              input[[paste0("INT_length_", n_INT)]])
              )),
            column(
              width = 4,

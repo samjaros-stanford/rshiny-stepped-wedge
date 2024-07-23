@@ -1,8 +1,8 @@
 ################################################################################
 # UI Elements that need to be declared in advance for use in server.R
 
-make_INT_name_ui <- function(n_INT, input){
-  lapply(1:n_INT,
+make_INT_name_ui <- function(input){
+  lapply(1:input$n_INT,
          function(i){
            textInput(
              inputId = paste0("INT_name_", i),
@@ -15,7 +15,7 @@ make_INT_name_ui <- function(n_INT, input){
 
 # Create intervention timing tab -----------------------------------------------
 # Combine existing input widgets with their names from input reactive
-make_INT_timing_ui <- function(n_INT, input){
+make_INT_timing_ui <- function(input){
   c(list(
     tags$u(strong(ifelse(input$INT_name_1 == "",
                          paste0("Intervention 1"),
@@ -47,7 +47,7 @@ make_INT_timing_ui <- function(n_INT, input){
              ))
     )),
     sapply(
-      2:(n_INT - 1),
+      2:(input$n_INT - 1),
       function(i){
         list(
           tags$u(strong(ifelse(input[[paste0("INT_name_", i)]] == "",
@@ -75,27 +75,27 @@ make_INT_timing_ui <- function(n_INT, input){
           )
         )
       }),
-    list(tags$u(strong(ifelse(input[[paste0("INT_name_", n_INT)]] == "",
-                              paste0("Intervention ", n_INT),
-                              input[[paste0("INT_name_", n_INT)]]))),
+    list(tags$u(strong(ifelse(input[[paste0("INT_name_", input$n_INT)]] == "",
+                              paste0("Intervention ", input$n_INT),
+                              input[[paste0("INT_name_", input$n_INT)]]))),
          fluidRow(
            column(
              width = 4,
              numericInput(
-               inputId = paste0("INT_gap_", n_INT),
+               inputId = paste0("INT_gap_", input$n_INT),
                label = "Delay Before",
-               value = ifelse(is.null(input[[paste0("INT_gap_", n_INT)]]),
+               value = ifelse(is.null(input[[paste0("INT_gap_", input$n_INT)]]),
                               default$study$INT_gap,
-                              input[[paste0("INT_gap_", n_INT)]])
+                              input[[paste0("INT_gap_", input$n_INT)]])
              )),
            column(
              width = 4,
              numericInput(
-               inputId = paste0("INT_length_", n_INT),
+               inputId = paste0("INT_length_", input$n_INT),
                label = "Min Duration",
-               value = ifelse(is.null(input[[paste0("INT_length_", n_INT)]]),
+               value = ifelse(is.null(input[[paste0("INT_length_", input$n_INT)]]),
                               default$study$INT_length,
-                              input[[paste0("INT_length_", n_INT)]])
+                              input[[paste0("INT_length_", input$n_INT)]])
              )),
            column(
              width = 4,

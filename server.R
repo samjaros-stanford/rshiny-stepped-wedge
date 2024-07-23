@@ -42,6 +42,8 @@ server <- function(input, output){
   })
   
   # Dynamic UI Elements ========================================================
+  # Functions to create UI elements are in 2_dynamic_ui.R. Reactive elements 
+  #   only contain decisions on when the UI should be updated
   ## --- Intervention Naming ---
   ## Creates a number of text inputs equal to the number of interventions
   output$INT_names <- renderUI({
@@ -51,7 +53,7 @@ server <- function(input, output){
     if(is.na(n_int) | n_int<1){
       return(helpText("Number of interventions is invalid"))
     }
-    isolate(make_INT_name_ui(n_int, input))
+    isolate(make_INT_name_ui(input))
   })
   ## --- Intervention Timing ---
   ## Creates a number of duration inputs equal to the number of interventions
@@ -62,7 +64,7 @@ server <- function(input, output){
     if(is.na(n_int) | n_int<1){
       return(helpText("Number of interventions is invalid"))
     }
-    c(isolate(make_INT_timing_ui(n_int, input)),
+    c(isolate(make_INT_timing_ui(input)),
       list(
         numericInput(
           inputId = "INT_offset",
@@ -109,8 +111,9 @@ server <- function(input, output){
   })
   
   # Study Creation =============================================================
-  # Dynamically observe intervention lengths based on the number of
-  #   intervention lengths, assigning them a value of 0 if uninitialized
+  ## --- Assemble needed variables ---
+  ## Dynamically observe intervention lengths based on the number of
+  ##   intervention lengths, assigning them a value of 0 if uninitialized
   INT_config <- reactive({
     # --- Exceptions ---
     # Stop if intervention number is uninitialized
@@ -145,10 +148,11 @@ server <- function(input, output){
                                     input$INT_end_max)
     )
   })
-  # Create study specification with intervention start/stop times
-  #   study is a reactive function to cut down on computational workload
-  #   This prevents the study from being recalculated when only visualization
-  #   parameters have changed.
+  ## --- Create tabular study ---
+  ## Create study specification with intervention start/stop times
+  ##   study is a reactive function to cut down on computational workload
+  ##   This prevents the study from being recalculated when only visualization
+  ##   parameters have changed.
   study <- reactive({
     # --- Exceptions ---
     if(is.na(input$n_COH) | is.null(INT_config())){

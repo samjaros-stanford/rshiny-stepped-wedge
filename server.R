@@ -166,14 +166,49 @@ server <- function(input, output){
   })
   
   # Plotting ===================================================================
+  
+  viz_options <- reactive({
+    # List containing options to send to make_plot()
+    option_list = list()
+    # Add cohort names if initialized
+    if(input$advanced_COH) {
+      option_list <- append(option_list,
+                            list(COH_names = sapply(
+                              1:input$n_COH, 
+                              function(i){
+                                ifelse(input[[paste0("COH_name_", i)]] == "",
+                                       paste0("Cohort ", i),
+                                       input[[paste0("COH_name_", i)]])
+                              })))
+    }
+    # Add intervention names
+    option_list <- append(option_list,
+                          list(INT_names = sapply(
+                            1:input$n_INT,
+                            function(i){
+                              ifelse(input[[paste0("INT_name_", i)]] == "",
+                                     paste0("Intervention ", i),
+                                     input[[paste0("INT_name_", i)]])
+                            }
+                          )))
+    # Add timing unit
+    if(input$time_units!="") {
+      option_list <- append(option_list,
+                            list(time_units = input$time_units))
+    }
+    # Return arguments
+    option_list
+  })
+  ## Create plot using the assembled study and plotting options
   output$plot <- renderPlot({
     # Fail states
     if(!do.plot | is.null(study())){
       return(NULL)
     }
     # Call plotting
-    make_plot(study())
+    make_plot(study(), viz_options())
   })
+  
   # Temp for Testing ===========================================================
   # Returns a text of all input values
   output$input_list <- renderText({

@@ -57,7 +57,7 @@ tab1 <- tabPanel(
   ),
   numericInput(
     inputId = "n_COH",
-    label = "How many participant groups in your study?",
+    label = "How many cohorts are your study?",
     value = default$study$n_COH,
     min = 1,
     max = 32,
@@ -77,11 +77,6 @@ tab2 <- tabPanel(
   title = "2. Names",
   value = "tab2",
   helpText("Provide names that will be used for the data input and plotting."),
-  textInput(
-    inputId = "time_units",
-    label = "What are the time units for your study?",
-    value = default$study$time_units
-  ),
   uiOutput("INT_names"),
   ### --- Page actions
   backButton("tab2_back"),
@@ -107,6 +102,11 @@ tab4 <- tabPanel(
   title = "4. Plot",
   value = "tab4",
   helpText("Customize the plotting and save your figure."),
+  textInput(
+    inputId = "time_units",
+    label = "What are the time units for your study?",
+    value = default$study$time_units
+  ),
   ### --- Page actions
   ### There is no next since this is the last page (for now)
   backButton("tab4_back")
@@ -132,9 +132,18 @@ sidebar <- sidebarPanel(tabs)
 
 # Main =========================================================================
 main <- mainPanel(
-  verbatimTextOutput("input_list"), # For testing
-  tableOutput("study"), # For testing
   plotOutput("plot"),
+  # --- For testing ---
+  fluidRow(
+    column(
+      width = 6,
+      tableOutput("config")),
+    column(
+      width = 6,
+      tableOutput("study"))
+    ), 
+  # --- For testing ---
+  verbatimTextOutput("input_list"),
   textOutput("save_status")
 )
 

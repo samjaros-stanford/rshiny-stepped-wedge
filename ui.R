@@ -149,6 +149,8 @@ main <- mainPanel(
 
 # UI: Page layout ==============================================================
 ui <- fluidPage(
+  # Create better page title
+  tags$head(HTML(paste0("<title>", page_title, "</title>"))),
   # Enable right justification and invisibility
   tags$head(tags$style(".rightAlign{float:right;}
                         .invisible{position:none;}")),

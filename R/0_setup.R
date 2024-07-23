@@ -7,6 +7,8 @@ library(dplyr)
 library(purrr)
 
 # App options ==================================================================
+# Page title
+page_title = "Stepped Wedge Trial Emulator"
 # Define the maximum number of interventions and cohorts possible
 max_n_INT = 16
 max_n_COH = 16

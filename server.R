@@ -76,38 +76,29 @@ server <- function(input, output){
   ## --- Cohort Customizations ---
   ## Generates the cohort customization tabset
   output$COH_customization <- renderUI({
+    # Isolated values will only be recalculated if the main tabset changes
+    input$input_tabs
     n_COH = as.integer(input$n_COH)
     # Return help text if the group numbers are invalid
     if(is.na(n_COH) | n_COH<1){
       return(helpText("Number of groups is invalid"))
     }
     # Generate a tabset with a dynamic number of tabs
-    # tabsetPanel() needs tabPanels as the inputs, not a list
-    # Workaround is using do.call() with all of the arguments in a list
-    do.call(
+    # Isolated unless main tab is changed
+    # do.call() required so all tabPanels are arguments, not just a list
+    isolate(do.call(
       tabsetPanel,
       append(
         list(
           id = "COH_tabs",
-          selected = "COH_1",
           type = "pills"
         ),
         lapply(1:n_COH,
-               function(i){
-                 tabPanel(
-                   title = i,
-                   value = paste0("COH_",i),
-                   textInput(
-                     inputId = paste0("COH_name_", i),
-                     label = paste0("Name of cohort ", i),
-                     # Use the existing input as the default value
-                     value = input[[paste0("COH_name_",i)]]
-                   )
-                 )
-               }
+               make_COH_customization_tab_ui,
+               input=input
         )
       )
-    )
+    ))
   })
   
   # Study Creation =============================================================

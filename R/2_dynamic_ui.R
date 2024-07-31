@@ -116,5 +116,16 @@ make_INT_timing_ui <- function(input){
     )
 }
 
-
-
+# Create cohort customization tabs ---------------------------------------------
+make_COH_customization_tab_ui <- function(COH_id, input){
+  tabPanel(
+    title = COH_id,
+    value = paste0("COH_",COH_id),
+    textInput(
+      inputId = paste0("COH_name_", COH_id),
+      label = paste0("Name of cohort ", COH_id),
+      # Use the existing input as the default value
+      value = input[[paste0("COH_name_", COH_id)]]
+    )
+  )
+}

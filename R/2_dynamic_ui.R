@@ -1,6 +1,11 @@
 ################################################################################
-# UI Elements that need to be declared in advance for use in server.R
+# UI Elements or functions that need to be declared in advance for use in 
+#   server.R
 
+# Create intervention names for naming tab -------------------------------------
+# Make a name slot for each intervention
+# Default value in the box is the current value if initialized, otherwise blank
+# Blank name values need to be handled by other functions
 make_INT_name_ui <- function(input){
   lapply(1:input$n_INT,
          function(i){
@@ -17,9 +22,11 @@ make_INT_name_ui <- function(input){
 # Combine existing input widgets with their names from input reactive
 make_INT_timing_ui <- function(input){
   c(list(
+    # Heading for first intervention
     tags$u(strong(ifelse(input$INT_name_1 == "",
                          paste0("Intervention 1"),
                          input$INT_name_1))),
+    # First intervention specs require gap, minimum, and maximum
     fluidRow(
       column(width = 4,
              numericInput(

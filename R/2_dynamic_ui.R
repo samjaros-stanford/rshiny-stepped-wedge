@@ -118,14 +118,48 @@ make_INT_timing_ui <- function(input){
 
 # Create cohort customization tabs ---------------------------------------------
 make_COH_customization_tab_ui <- function(COH_id, input){
+  # Setup lists of interventions for the bucket_list
+  # First initialization just uses
+  if(is.null(input[[paste0("COH_bucket_group_", COH_id)]])){
+    included_INT <- lapply(1:input$n_INT, 
+                           function(x){input[[paste0("INT_name_",x)]]})
+    names(included_INT) <- 1:input$n_INT
+    excluded_INT <- NULL
+  } else {
+    included_INT <- lapply(input[[paste0("COH_INT_incl_order_", COH_id)]], 
+                           function(x){input[[paste0("INT_name_",x)]]})
+    names(included_INT) <- input[[paste0("COH_INT_incl_order_", COH_id)]]
+    excluded_INT <- lapply(input[[paste0("COH_INT_excl_order_", COH_id)]], 
+                           function(x){input[[paste0("INT_name_",x)]]})
+    names(excluded_INT) <- input[[paste0("COH_INT_excl_order_", COH_id)]]
+  }
+  
+  # Create tabPanel
   tabPanel(
     title = COH_id,
     value = paste0("COH_",COH_id),
+    # Cohort name
     textInput(
       inputId = paste0("COH_name_", COH_id),
       label = paste0("Name of cohort ", COH_id),
       # Use the existing input as the default value
       value = input[[paste0("COH_name_", COH_id)]]
+    ),
+    # Intervention order
+    bucket_list(
+      header = "Drag the interventions to reorder or remove",
+      group_name = paste0("COH_bucket_group_", COH_id),
+      orientation = "vertical",
+      add_rank_list(
+        text = "Included intervetions",
+        labels = included_INT,
+        input_id = paste0("COH_INT_incl_order_", COH_id)
+      ),
+      add_rank_list(
+        text = "Excluded interventions",
+        labels = excluded_INT,
+        input_id = paste0("COH_INT_excl_order_", COH_id)
+      )
     )
   )
 }

@@ -1,10 +1,11 @@
 rm(list=ls())
 
 # Load libraries ===============================================================
-library(shiny)
-library(ggplot2)
 library(dplyr)
+library(ggplot2)
 library(purrr)
+library(shiny)
+library(sortable)
 
 # App options ==================================================================
 # Page title
@@ -13,7 +14,7 @@ page_title = "Stepped Wedge Trial Emulator"
 max_n_INT = 16
 max_n_COH = 16
 ## Debugging
-do.debug = F
+do.debug = T
 do.plot = T
 do.table = F
 

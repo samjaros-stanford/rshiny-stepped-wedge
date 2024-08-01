@@ -1,6 +1,11 @@
 ################################################################################
-# New Server
-#  For now, just prints out the list provided by the input
+# RShiny Server
+#   Handles tab navigation functionality
+#   Ultimate caller of dynamic UI functions contained in 2_dynamic_ui.R
+#   Handles processing of overall and customized intervention timings
+#   Ultimate caller of study creation functions contained in 6_generate_study.R
+#   Handles processing of visualization customization
+#   Ultimate caller of plotting function contained in 8_make_plot.R
 
 server <- function(input, output){
   # Tab Functionality ==========================================================

@@ -1,8 +1,52 @@
 ################################################################################
-# Generate study
-# 
+# Functions required to process input into study specifications and overall
+#   study. Functions should remain isolated so they are not called until needed.
+
+# Basic study specifications ===================================================
+# If the advanced cohort tab has not been accessed, all cohorts have the same
+#   configuration for each intervention
+basic_study_config <- function(input){
+  cross_join(data.frame(COH = 1:input$n_COH),
+             data.frame(INT = 1:input$n_INT,
+               # Need to iterate through all intervention lengths
+               INT_length = sapply(
+                 1:input$n_INT, 
+                 function(i){
+                   input[[paste0("INT_length_",i)]]
+                 }),
+               # Need to iterate through all intervention gaps
+               INT_gap = sapply(
+                 1:input$n_INT, 
+                 function(i){
+                   input[[paste0("INT_gap_",i)]]
+                 }),
+               # Offset has special case where if it is completely uninitialized,
+               #   it needs to be 0/NA so that a phantom study is not created.
+               #   If it has been initialized but the user has not set the
+               #   value, it can be assumed to have the default offset.
+               INT_offset = ifelse(is.na(input$INT_offset),
+                                   default$study$INT_null_offset,
+                                   input$INT_offset),
+               # If the maxes are uninitialized or blank, use the default
+               INT_start_max = ifelse(is.null(input$INT_start_max) || is.na(input$INT_start_max),
+                                      default$study$INT_start_max,
+                                      input$INT_start_max),
+               INT_end_max = ifelse(is.null(input$INT_end_max) || is.na(input$INT_end_max),
+                                    default$study$INT_end_max,
+                                    input$INT_end_max)
+    )
+  )
+}
+
+# Custom study specifications ==================================================
+# If the advanced cohort tab has been accessed, check the cohort inputs for new
+#   values. Otherwise use the values from the main intervention input
+custom_study_config <- function(input){
+  
+}
+
+# Generate study ===============================================================
 # Generate a stepwise wedge study given study configuration
-# 
 # base_study - data frame with study cohort configuration
 #   Required columns:
 #     COH - Cohort ID
@@ -22,7 +66,6 @@ generate_study <- function(base_study){
   #   intervention #3)
   not_last_INT <- base_study %>%
     # Calculate start
-    arrange(INT, COH) %>%
     group_by(COH) %>%
     filter(row_number() == 1) %>%
     ungroup() %>%
@@ -33,13 +76,11 @@ generate_study <- function(base_study){
     select(COH, INT, INT_length, INT_gap, INT_start, INT_end) %>%
     # Calculate middle interventions
     bind_rows(base_study %>%
-                arrange(INT, COH) %>%
                 group_by(COH) %>%
                 filter(row_number()!=1 & row_number()!=n()) %>%
                 ungroup()) %>%
     arrange(COH, INT)
   
-  # How to do this without for loop???
   for(i in 1:nrow(not_last_INT)){
     # If INT_start has already been figured out, we're good
     # This also takes care of when i=1
@@ -55,7 +96,6 @@ generate_study <- function(base_study){
   }
   
   last_INT <- base_study %>%
-    arrange(COH, INT) %>%
     group_by(COH) %>%
     # If there's only 1 intervention for a cohort, it has already been figured out
     filter(row_number()!=1 & row_number()==n()) %>%
@@ -80,20 +120,7 @@ generate_study <- function(base_study){
 
   rbind(not_last_INT %>%
           select(COH, INT, INT_start, INT_end), 
-        last_INT) %>%
-    arrange(COH, INT)
+        last_INT)
 }
 
-#===============================================================================
-# Testing
-
-# base_study <- data.frame(COH = 1:3) %>%
-#   cross_join(data.frame(INT = 1:5,
-#                         INT_length = 1,
-#                         INT_offset = 2,
-#                         INT_gap = 0,
-#                         INT_start_max = 2,
-#                         INT_end_max = 2))
-# 
-# generate_study(base_study=base_study)
   

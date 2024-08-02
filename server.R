@@ -107,43 +107,6 @@ server <- function(input, output){
   })
   
   # Study Creation =============================================================
-  ## --- Assemble needed variables ---
-  ## Dynamically observe intervention lengths based on the number of
-  ##   intervention lengths, assigning them a value of 0 if uninitialized
-  INT_config <- reactive({
-    # --- Exceptions ---
-    # Stop if intervention number is uninitialized
-    # Stop if offset is uninitialized (timing tab uninitialized)
-    if(is.na(input$n_INT) | is.null(input$INT_offset)){
-      return(NULL)
-    }
-    
-    data.frame(INT = 1:input$n_INT,
-               INT_length = sapply(
-                 1:input$n_INT, 
-                 function(i){
-                   input[[paste0("INT_length_",i)]]
-                 }),
-               INT_gap = sapply(
-                 1:input$n_INT, 
-                 function(i){
-                  input[[paste0("INT_gap_",i)]]
-                 }),
-               # Offset has special case where if it is completely uninitialized,
-               #   it needs to be 0/NA so that a phantom study is not created.
-               #   If it has been initialized but the user has not set the
-               #   value, it can be assumed to have the default offset.
-               INT_offset = ifelse(is.na(input$INT_offset),
-                                   default$study$INT_null_offset,
-                                   input$INT_offset),
-               INT_start_max = ifelse(is.null(input$INT_start_max) || is.na(input$INT_start_max),
-                                      default$study$INT_start_max,
-                                      input$INT_start_max),
-               INT_end_max = ifelse(is.null(input$INT_end_max) || is.na(input$INT_end_max),
-                                    default$study$INT_end_max,
-                                    input$INT_end_max)
-    )
-  })
   ## --- Create tabular study ---
   ## Create study specification with intervention start/stop times
   ##   study is a reactive function to cut down on computational workload
@@ -151,15 +114,16 @@ server <- function(input, output){
   ##   parameters have changed.
   study <- reactive({
     # --- Exceptions ---
-    if(is.na(input$n_COH) | is.null(INT_config())){
+    # Stop if intervention number is uninitialized
+    # Stop if offset is uninitialized (timing tab uninitialized)
+    if(is.na(input$n_COH) | is.na(input$n_INT) | is.null(input$INT_offset)){
       return(NULL)
     }
     # --- Assemble study spec ---
-    if(input$advanced_COH > 0 & F){ # Construct separately by cohort, & F to disable for now
-      base_study <- data.frame()
+    if(input$advanced_COH < 1){
+      base_study <- basic_study_config(input)
     } else {
-      base_study <- data.frame(COH = 1:input$n_COH) %>%
-        cross_join(INT_config())
+      base_study <- custom_study_config(input)
     }
     # --- Call construction function ---
     generate_study(base_study)

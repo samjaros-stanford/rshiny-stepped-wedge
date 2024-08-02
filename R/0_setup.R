@@ -13,10 +13,11 @@ page_title = "Stepped Wedge Trial Emulator"
 # Define the maximum number of interventions and cohorts possible
 max_n_INT = 16
 max_n_COH = 16
-## Debugging
-do.debug = T
-do.plot = T
-do.table = F
+## Change what is outputted for debugging purposes
+## In normal operations, these should all be FALSE
+do.input = F        # Should the input list be displayed?
+suppress.plot = F   # Should the plot be suppressed?
+do.table = F        # Should the configuration and study tables be displayed?
 
 # Shiny Options ================================================================
 options(shiny.fullstacktrace = TRUE)

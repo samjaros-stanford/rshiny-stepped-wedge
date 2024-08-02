@@ -161,7 +161,6 @@ server <- function(input, output){
   })
   
   # Plotting ===================================================================
-  
   viz_options <- reactive({
     # List containing options to send to make_plot()
     option_list = list()
@@ -197,7 +196,7 @@ server <- function(input, output){
   ## Create plot using the assembled study and plotting options
   output$plot <- renderPlot({
     # Fail states
-    if(!do.plot | is.null(study())){
+    if(suppress.plot | is.null(study())){
       return(NULL)
     }
     # Call plotting
@@ -208,33 +207,31 @@ server <- function(input, output){
   # Returns a text of all input values
   output$input_list <- renderText({
     # Check if this is wanted
-    if(!do.debug){
+    if(!do.input){
       return(NULL)
     }
-    
     input_names = names(reactiveValuesToList(input))
     out_string = ""
     for(name in input_names){
-      out_string = paste0(out_string, name, ": ", input[[name]], "\n")
+      out_string = paste0(out_string, name, ": ", 
+                          paste0(input[[name]]), "\n")
     }
     out_string
   })
   # Returns config passed to study constructor
   output$config <- renderTable({
     # Check if this is wanted
-    if(!(do.table | do.debug)){
+    if(!(do.table)){
       return(NULL)
     }
-    
     INT_config()
   })
   # Returns study construction
   output$study <- renderTable({
     # Check if this is wanted
-    if(!(do.table | do.debug)){
+    if(!(do.table)){
       return(NULL)
     }
-    
     study()
   })
 }

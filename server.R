@@ -107,6 +107,21 @@ server <- function(input, output){
   })
   
   # Study Creation =============================================================
+  ## --- Create study configuration ---
+  ## Assemble inputs into the format needed for study assembly
+  study_config <- reactive({
+    # --- Exceptions ---
+    # If timing tab is uninitialized
+    if(is.null(input$INT_offset)){
+      return(NULL)
+    }
+    # If the by cohort tabs are uninitialized, use basic config
+    if(is.null(input$COH_tabs)){
+      basic_study_config(input)
+    } else {
+      custom_study_config(input)
+    }
+  })
   ## --- Create tabular study ---
   ## Create study specification with intervention start/stop times
   ##   study is a reactive function to cut down on computational workload
@@ -116,17 +131,11 @@ server <- function(input, output){
     # --- Exceptions ---
     # Stop if intervention number is uninitialized
     # Stop if offset is uninitialized (timing tab uninitialized)
-    if(is.na(input$n_COH) | is.na(input$n_INT) | is.null(input$INT_offset)){
+    if(is.na(input$n_COH) || is.na(input$n_INT) || is.null(study_config())){
       return(NULL)
     }
-    # --- Assemble study spec ---
-    if(input$advanced_COH < 1){
-      base_study <- basic_study_config(input)
-    } else {
-      base_study <- custom_study_config(input)
-    }
     # --- Call construction function ---
-    generate_study(base_study)
+    generate_study(study_config())
   })
   
   # Plotting ===================================================================

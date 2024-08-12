@@ -42,7 +42,43 @@ basic_study_config <- function(input){
 # If the advanced cohort tab has been accessed, check the cohort inputs for new
 #   values. Otherwise use the values from the main intervention input
 custom_study_config <- function(input){
-  
+  config <- data.frame()
+  # Sometimes, the needed UI hasn't been loaded. If so, return null and wait
+  #   for the UI to be loaded. Uses an arbitrary argument to check
+  for(i in 1:input$n_COH){
+    if(is.null(input[[paste0("COH_INT_incl_order_", i)]])){
+      return(NULL)
+    }
+    config <- bind_rows(
+      config,
+      data.frame(COH = i,
+                 INT = input[[paste0("COH_INT_incl_order_", i)]]))
+  }
+  config <- config %>%
+    rowwise() %>%
+    mutate(INT_length = 
+             if_else(is.na(input[[paste0("INT_length_",INT,"_COH_",COH)]]),
+                     input[[paste0("INT_length_",INT)]],
+                     input[[paste0("INT_length_",INT,"_COH_",COH)]]),
+           INT_gap = 
+             if_else(is.na(input[[paste0("INT_gap_",INT,"_COH_",COH)]]),
+                     input[[paste0("INT_gap_",INT)]],
+                     input[[paste0("INT_gap_",INT,"_COH_",COH)]]),
+           INT_offset = input$INT_offset,
+           INT_start_max = 
+             if_else(is.na(input[[paste0("INT_start_max_COH_",COH)]]),
+                     if_else(is.na(input$INT_start_max),
+                             default$study$INT_start_max,
+                             input$INT_start_max),
+                     input[[paste0("INT_start_max_COH_",COH)]]),
+           INT_end_max = 
+             if_else(is.na(input[[paste0("INT_end_max_COH_",COH)]]),
+                     if_else(is.na(input$INT_end_max),
+                             default$study$INT_end_max,
+                             input$INT_end_max),
+                     input[[paste0("INT_end_max_COH_",COH)]])) %>%
+    ungroup()
+  return(config)
 }
 
 # Generate study ===============================================================
@@ -59,7 +95,14 @@ custom_study_config <- function(input){
 generate_study <- function(base_study){
   #-----------------------------------------------------------------------------
   # Input checks
-  
+  if(is.null(base_study)){
+    return(NULL)
+  }
+  # Check for needed columns
+  if(!all(c("COH","INT","INT_length","INT_gap","INT_offset","INT_start_max","INT_end_max") %in%
+          colnames(base_study))){
+    return(NULL)
+  }
   #-----------------------------------------------------------------------------
   # Calculate the first intervention separately
   #   Allows for different starting interventions (ex. Group 2 starts with 

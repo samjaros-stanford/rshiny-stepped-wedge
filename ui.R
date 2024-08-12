@@ -134,17 +134,10 @@ sidebar <- sidebarPanel(tabs)
 main <- mainPanel(
   plotOutput("plot"),
   # --- For testing ---
-  fluidRow(
-    column(
-      width = 6,
-      tableOutput("config")),
-    column(
-      width = 6,
-      tableOutput("study"))
-    ), 
+  tableOutput("config"),
+  tableOutput("study"), 
   # --- For testing ---
-  verbatimTextOutput("input_list"),
-  textOutput("save_status")
+  verbatimTextOutput("input_list")
 )
 
 # UI: Page layout ==============================================================

@@ -165,23 +165,22 @@ server <- function(input, output){
   ## Create plot using the assembled study and plotting options
   output$plot <- renderPlot({
     # Fail states
-    if(suppress.plot | is.null(study())){
+    if(suppress.plot || is.null(study())){
       return(NULL)
     }
     # Call plotting
     make_plot(study(), viz_options())
   })
   
-  # Temp for Testing ===========================================================
+  # Optional Testing Outputs ===================================================
   # Returns a text of all input values
   output$input_list <- renderText({
     # Check if this is wanted
     if(!do.input){
       return(NULL)
     }
-    input_names = names(reactiveValuesToList(input))
     out_string = ""
-    for(name in input_names){
+    for(name in names(reactiveValuesToList(input))){
       out_string = paste0(out_string, name, ": ", 
                           paste0(input[[name]]), "\n")
     }
@@ -189,15 +188,15 @@ server <- function(input, output){
   })
   # Returns config passed to study constructor
   output$config <- renderTable({
-    # Check if this is wanted
+    # Check if this is wanted or if study cannot be initialized
     if(!(do.table)){
       return(NULL)
     }
-    INT_config()
+    study_config()
   })
   # Returns study construction
   output$study <- renderTable({
-    # Check if this is wanted
+    # Check if this is wanted or if study cannot be initialized
     if(!(do.table)){
       return(NULL)
     }

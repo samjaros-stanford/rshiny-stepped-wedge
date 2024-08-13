@@ -112,7 +112,7 @@ tab4 <- tabPanel(
   backButton("tab4_back")
 )
 ### Cohort Setup Tab -----------------------------------------------------------
-### Declared in 1_dynamic_ui.R for showTab functionality
+### Declared in 2_dynamic_ui.R for showTab functionality
 
 ## Construct tabset
 ##   Users should not see all tabs at once
@@ -127,10 +127,10 @@ tabs <- tabsetPanel(
   tab4
 )
 
-# Sidebar ======================================================================
+## Sidebar ======================================================================
 sidebar <- sidebarPanel(tabs)
 
-# Main =========================================================================
+## Main =========================================================================
 main <- mainPanel(
   plotOutput("plot"),
   # --- For testing ---

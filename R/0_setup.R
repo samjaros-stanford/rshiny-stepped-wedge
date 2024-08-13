@@ -3,7 +3,6 @@ rm(list=ls())
 # Load libraries ===============================================================
 library(dplyr)
 library(ggplot2)
-library(purrr)
 library(shiny)
 library(sortable)
 

@@ -19,11 +19,11 @@ make_plot <- function(study, args=list()){
     geom_segment(aes(x=INT_start, xend=INT_end), linewidth=12) +
     scale_color_brewer(name=NULL, 
                        palette="Set1",
-                       breaks = 1:max(study$INT),
+                       breaks = 1:length(viz_args$INT_names),
                        labels = viz_args$INT_names) +
     scale_x_continuous(viz_args$time_units, breaks=scales::breaks_pretty()) +
     scale_y_discrete("Cohort", 
-                     breaks = 1:max(study$COH), 
+                     breaks = 1:length(viz_args$COH_names), 
                      labels = viz_args$COH_names,
                      limits = rev) +
     theme_classic() +
@@ -31,22 +31,3 @@ make_plot <- function(study, args=list()){
           legend.position = "bottom",
           panel.grid.major.x = element_line(color="grey90", linewidth=0.5))
 }
-
-
-################################################################################
-# Testing
-
-study = tribble(~COH, ~INT, ~INT_start, ~INT_end,
-                1,    1,    0,          2,
-                1,    2,    2,          4,
-                1,    3,    4,          10,
-                2,    1,    0,          3,
-                2,    2,    3,          5,
-                2,    3,    5,          10,
-                3,    1,    0,          4,
-                3,    2,    4,          6,
-                3,    3,    6,          10,
-                4,    1,    0,          5,
-                4,    2,    5,          7,
-                4,    3,    7,          10)
-make_plot(study)

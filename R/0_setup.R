@@ -1,10 +1,10 @@
 rm(list=ls())
 
 # Load libraries ===============================================================
-library(shiny)
-library(ggplot2)
 library(dplyr)
-library(purrr)
+library(ggplot2)
+library(shiny)
+library(sortable)
 
 # App options ==================================================================
 # Page title

@@ -122,27 +122,37 @@ make_INT_timing_by_COH_ui <- function(COH_id, input){
   # NOTE: Goal is to eventually use semanticUI, which can handle numeric placeholders
   #       however, this will be implemented in a future change
   
+  # Get interventions/order 
+  INT_order <- input[[paste0("COH_INT_incl_order_", COH_id)]]
+  
+  # If no interventions, no timing UI
+  if(length(INT_order) < 1){
+    return(NULL)
+  }
+  
+  # Start with first intervention
+  i <- INT_order[1]
   INT_timing_ui <- list(
     # Heading for first intervention
-    tags$u(strong(ifelse(input$INT_name_1 == "",
-                         paste0("Intervention 1"),
-                         input$INT_name_1))),
+    tags$u(strong(ifelse(input[[paste0("INT_name_", i)]] == "",
+                         paste0("Intervention ", i),
+                         input[[paste0("INT_name_", i)]]))),
     # First intervention specs require gap, minimum, and maximum
     fluidRow(
       column(width = 4,
              numericInput(
-               inputId = paste0("INT_gap_1_COH_", COH_id),
+               inputId = paste0("INT_gap_", i, "_COH_", COH_id),
                label = "Delay Before",
-               value = ifelse(is.na(input[[paste0("INT_gap_1_COH_", COH_id)]]),
+               value = ifelse(is.na(input[[paste0("INT_gap_", i, "_COH_", COH_id)]]),
                               NA,
-                              input[[paste0("INT_gap_1_COH_", COH_id)]]))),
+                              input[[paste0("INT_gap_", i, "_COH_", COH_id)]]))),
       column(width = 4,
              numericInput(
-               inputId = paste0("INT_length_1_COH_", COH_id),
+               inputId = paste0("INT_length_", i, "_COH_", COH_id),
                label = "Min Duration",
-               value = ifelse(is.na(input[[paste0("INT_length_1_COH_", COH_id)]]),
+               value = ifelse(is.na(input[[paste0("INT_length_", i, "_COH_", COH_id)]]),
                               NA,
-                              input[[paste0("INT_length_1_COH_", COH_id)]]))),
+                              input[[paste0("INT_length_", i, "_COH_", COH_id)]]))),
       column(width = 4,
              numericInput(
                inputId = paste0("INT_start_max_COH_", COH_id),
@@ -153,25 +163,26 @@ make_INT_timing_by_COH_ui <- function(COH_id, input){
   
   # If there's more than two interventions, we need to add "middle"
   #   interventions that have a definite length
-  if(input$n_INT>2){
+  if(length(INT_order) > 2){
+    middle_INTs <- INT_order[2:(length(INT_order)-1)]
+
     INT_timing_ui <- c(
       INT_timing_ui,
       sapply(
-        2:(input$n_INT - 1),
+        middle_INTs,
         function(i){
           list(
             tags$u(strong(ifelse(input[[paste0("INT_name_", i)]] == "",
                                  paste0("Intervention ", i),
                                  input[[paste0("INT_name_", i)]]))),
             fluidRow(
-              column(
-                width = 6,
-                numericInput(
-                  inputId = paste0("INT_gap_", i, "_COH_", COH_id),
-                  label = "Delay Before",
-                  value = ifelse(is.na(input[[paste0("INT_gap_", i, "_COH_", COH_id)]]),
-                                 NA,
-                                 input[[paste0("INT_gap_", i, "_COH_", COH_id)]]))),
+              column(width = 6,
+                     numericInput(
+                       inputId = paste0("INT_gap_", i, "_COH_", COH_id),
+                       label = "Delay Before",
+                       value = ifelse(is.na(input[[paste0("INT_gap_", i, "_COH_", COH_id)]]),
+                                      NA,
+                                      input[[paste0("INT_gap_", i, "_COH_", COH_id)]]))),
               column(
                 width = 6,
                 numericInput(
@@ -182,37 +193,37 @@ make_INT_timing_by_COH_ui <- function(COH_id, input){
                                  input[[paste0("INT_length_", i, "_COH_", COH_id)]])))))}))}
   
   # If there's only 1 intervention, it was already added by the first step
-  if(input$n_INT>1){
+  if(length(INT_order)>1){
+    i <- INT_order[length(INT_order)]
     INT_timing_ui <- c(
       INT_timing_ui,
-      list(tags$u(strong(ifelse(input[[paste0("INT_name_", input$n_INT)]] == "",
-                                paste0("Intervention ", input$n_INT),
-                                input[[paste0("INT_name_", input$n_INT)]]))),
-           fluidRow(
-             column(
-               width = 4,
-               numericInput(
-                 inputId = paste0("INT_gap_", input$n_INT, "_COH_", COH_id),
-                 label = "Delay Before",
-                 value = ifelse(is.na(input[[paste0("INT_gap_", input$n_INT, "_COH_", COH_id)]]),
-                                NA,
-                                input[[paste0("INT_gap_", input$n_INT, "_COH_", COH_id)]]))),
-             column(
-               width = 4,
-               numericInput(
-                 inputId = paste0("INT_length_", input$n_INT, "_COH_", COH_id),
-                 label = "Min Duration",
-                 value = ifelse(is.na(input[[paste0("INT_length_", input$n_INT, "_COH_", COH_id)]]),
-                                NA,
-                                input[[paste0("INT_length_", input$n_INT, "_COH_", COH_id)]]))),
-             column(
-               width = 4,
-               numericInput(
-                 inputId = paste0("INT_end_max_COH_", COH_id),
-                 label = "Max Duration",
-                 value = ifelse(is.na(input[[paste0("INT_end_max_COH_", COH_id)]]),
-                                NA,
-                                input[[paste0("INT_end_max_COH_", COH_id)]]))))))}
+      list(
+        tags$u(strong(ifelse(input[[paste0("INT_name_", i)]] == "",
+                             paste0("Intervention ", i),
+                             input[[paste0("INT_name_", i)]]))),
+        # First intervention specs require gap, minimum, and maximum
+        fluidRow(
+          column(width = 4,
+                 numericInput(
+                   inputId = paste0("INT_gap_", i, "_COH_", COH_id),
+                   label = "Delay Before",
+                   value = ifelse(is.na(input[[paste0("INT_gap_", i, "_COH_", COH_id)]]),
+                                  NA,
+                                  input[[paste0("INT_gap_", i, "_COH_", COH_id)]]))),
+          column(width = 4,
+                 numericInput(
+                   inputId = paste0("INT_length_", i, "_COH_", COH_id),
+                   label = "Min Duration",
+                   value = ifelse(is.na(input[[paste0("INT_length_", i, "_COH_", COH_id)]]),
+                                  NA,
+                                  input[[paste0("INT_length_", i, "_COH_", COH_id)]]))),
+          column(width = 4,
+                 numericInput(
+                   inputId = paste0("INT_end_max_COH_", COH_id),
+                   label = "Max Duration",
+                   value = ifelse(is.na(input[[paste0("INT_end_max_COH_", COH_id)]]),
+                                  NA,
+                                  input[[paste0("INT_end_max_COH_", COH_id)]]))))))}
   
   return(INT_timing_ui)
 }

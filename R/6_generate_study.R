@@ -44,9 +44,10 @@ basic_study_config <- function(input){
 custom_study_config <- function(input){
   config <- data.frame()
   # Sometimes, the needed UI hasn't been loaded. If so, return null and wait
-  #   for the UI to be loaded. Uses an arbitrary argument to check
+  #   for the UI to be loaded. Checks for presence of input buckets and timing
   for(i in 1:input$n_COH){
-    if(is.null(input[[paste0("COH_INT_incl_order_", i)]])){
+    if(is.null(input[[paste0("COH_INT_incl_order_", i)]]) || 
+       is.null(input[[paste0("INT_start_max_COH_", i)]])){
       return(NULL)
     }
     config <- bind_rows(
@@ -165,5 +166,4 @@ generate_study <- function(base_study){
           select(COH, INT, INT_start, INT_end), 
         last_INT)
 }
-
   

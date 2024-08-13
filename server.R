@@ -81,24 +81,29 @@ server <- function(input, output){
   ## --- Cohort Customizations ---
   ## Generates the cohort customization tabset
   output$COH_customization <- renderUI({
-    # Isolated values will only be recalculated if the main tabset changes
-    input$input_tabs
-    n_COH = as.integer(input$n_COH)
     # Return help text if the group numbers are invalid
-    if(is.na(n_COH) | n_COH<1){
+    if(is.na(input$n_COH) | input$n_COH<1){
       return(helpText("Number of groups is invalid"))
     }
+    # Tabset should be redrawn if the main tabset changes
+    input$input_tabs
+    # Tabset should also be redrawn if a cohort bucket changes
+    for(i in 1:input$n_COH){
+      input[[paste0("COH_bucket_group_", i)]]
+    }
     # Generate a tabset with a dynamic number of tabs
-    # Isolated unless main tab is changed
+    # Isolated unless one of redraw conditions above are met
     # do.call() required so all tabPanels are arguments, not just a list
+    # Starting tab will be retained using 'selected'
     isolate(do.call(
       tabsetPanel,
       append(
         list(
           id = "COH_tabs",
-          type = "pills"
+          type = "pills",
+          selected = input$COH_tabs
         ),
-        lapply(1:n_COH,
+        lapply(1:input$n_COH,
                make_COH_customization_tab_ui,
                input=input
         )

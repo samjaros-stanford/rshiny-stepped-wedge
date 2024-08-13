@@ -50,6 +50,10 @@ custom_study_config <- function(input){
        is.null(input[[paste0("INT_start_max_COH_", i)]])){
       return(NULL)
     }
+    # If this cohort has no interventions, continue to the next cohort
+    if(length(input[[paste0("COH_INT_incl_order_", i)]]) < 1){
+      next
+    }
     config <- bind_rows(
       config,
       data.frame(COH = i,

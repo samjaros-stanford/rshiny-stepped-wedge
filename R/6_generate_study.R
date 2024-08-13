@@ -122,7 +122,7 @@ generate_study <- function(base_study){
                 group_by(COH) %>%
                 filter(row_number()!=1 & row_number()!=n()) %>%
                 ungroup()) %>%
-    arrange(COH, INT)
+    arrange(COH)
   
   for(i in 1:nrow(not_last_INT)){
     # If INT_start has already been figured out, we're good

@@ -66,19 +66,29 @@ custom_study_config <- function(input){
                      input[[paste0("INT_gap_",INT)]],
                      input[[paste0("INT_gap_",INT,"_COH_",COH)]]),
            INT_offset = input$INT_offset,
-           INT_start_max = 
-             if_else(is.na(input[[paste0("INT_start_max_COH_",COH)]]),
-                     if_else(is.na(input$INT_start_max),
-                             default$study$INT_start_max,
-                             input$INT_start_max),
-                     input[[paste0("INT_start_max_COH_",COH)]]),
-           INT_end_max = 
-             if_else(is.na(input[[paste0("INT_end_max_COH_",COH)]]),
-                     if_else(is.na(input$INT_end_max),
-                             default$study$INT_end_max,
-                             input$INT_end_max),
-                     input[[paste0("INT_end_max_COH_",COH)]])) %>%
-    ungroup()
+           INT_start_max = case_when(
+             # If by cohort is filled in, use it
+             !is.na(input[[paste0("INT_start_max_COH_",COH)]]) ~ input[[paste0("INT_start_max_COH_",COH)]],
+             # If main is filled it, use that
+             !is.na(input$INT_start_max) ~ input$INT_start_max,
+             # Otherwise, use default
+             T ~ default$study$INT_start_max
+           ))
+  # If there's only 1 intervention, end_max will not have been drawn, so don't look for it
+  if(input$n_INT>1){
+    config <- config %>%
+      mutate(INT_end_max = case_when(
+        # If by cohort is filled in, use it
+        !is.na(input[[paste0("INT_end_max_COH_",COH)]]) ~ c(input[[paste0("INT_end_max_COH_",COH)]]),
+        # If main is filled it, use that
+        !is.na(input$INT_end_max) ~ input$INT_end_max,
+        # Otherwise, use default
+        T ~ default$study$INT_end_max)) %>%
+      ungroup()
+  } else {
+    config <- config %>%
+      mutate(INT_end_max = default$study$INT_end_max)
+  }
   return(config)
 }
 

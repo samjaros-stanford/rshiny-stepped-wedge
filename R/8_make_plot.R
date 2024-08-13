@@ -19,11 +19,11 @@ make_plot <- function(study, args=list()){
     geom_segment(aes(x=INT_start, xend=INT_end), linewidth=12) +
     scale_color_brewer(name=NULL, 
                        palette="Set1",
-                       breaks = 1:max(study$INT),
+                       breaks = 1:length(viz_args$INT_names),
                        labels = viz_args$INT_names) +
     scale_x_continuous(viz_args$time_units, breaks=scales::breaks_pretty()) +
     scale_y_discrete("Cohort", 
-                     breaks = 1:max(study$COH), 
+                     breaks = 1:length(viz_args$COH_names), 
                      labels = viz_args$COH_names,
                      limits = rev) +
     theme_classic() +

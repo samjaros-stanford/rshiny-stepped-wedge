@@ -54,8 +54,7 @@ server <- function(input, output){
   output$INT_names <- renderUI({
     # Isolated values will only be recalculated if the tab changes
     input$input_tabs
-    n_int = as.integer(isolate(input$n_INT))
-    if(is.na(n_int) | n_int<1){
+    if(is.na(input$n_INT) || input$n_INT<1){
       return(helpText("Number of interventions is invalid"))
     }
     isolate(make_INT_name_ui(input))
@@ -65,8 +64,7 @@ server <- function(input, output){
   output$INT_timings <- renderUI({
     # Isolated values will only be recalculated if the tab or number changes
     input$input_tabs
-    n_int = as.integer(input$n_INT)
-    if(is.na(n_int) | n_int<1){
+    if(is.na(input$n_INT) || input$n_INT<1){
       return(helpText("Number of interventions is invalid"))
     }
     c(isolate(make_INT_timing_ui(input)),
@@ -82,11 +80,12 @@ server <- function(input, output){
   ## Generates the cohort customization tabset
   output$COH_customization <- renderUI({
     # Return help text if the group numbers are invalid
-    if(is.na(input$n_COH) | input$n_COH<1){
+    if(is.na(input$n_COH) || input$n_COH<1){
       return(helpText("Number of groups is invalid"))
     }
-    # Tabset should be redrawn if the main tabset changes
+    # Tabset should be redrawn if the main tabset or number of INTs change
     input$input_tabs
+    input$n_INT
     # Tabset should also be redrawn if a cohort bucket changes
     for(i in 1:input$n_COH){
       input[[paste0("COH_bucket_group_", i)]]
@@ -120,6 +119,9 @@ server <- function(input, output){
     if(is.null(input$INT_offset)){
       return(NULL)
     }
+    # Explicit update when the interventions change
+    input$n_INT
+    input$n_COH
     # If the by cohort tabs are uninitialized, use basic config
     if(is.null(input$COH_tabs)){
       basic_study_config(input)
@@ -166,15 +168,14 @@ server <- function(input, output){
                               ifelse(input[[paste0("INT_name_", i)]] == "",
                                      paste0("Intervention ", i),
                                      input[[paste0("INT_name_", i)]])
-                            }
-                          )))
+                            })))
     # Add timing unit
     if(input$time_units!="") {
       option_list <- append(option_list,
                             list(time_units = input$time_units))
     }
     # Return arguments
-    option_list
+    return(option_list)
   })
   ## Create plot using the assembled study and plotting options
   output$plot <- renderPlot({

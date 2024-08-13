@@ -162,7 +162,7 @@ generate_study <- function(base_study){
                 group_by(COH) %>%
                 summarize(prev_INT_end = max(INT_end)),
               by="COH") %>%
-    mutate(study_end = max(prev_INT_end + INT_gap + INT_length)) %>%
+    mutate(study_end = suppressWarnings(max(prev_INT_end + INT_gap + INT_length))) %>%
     # Get start and end times where the end time is the smaller of study_end or 
     #   the max length of the intervention
     rowwise() %>%

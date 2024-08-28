@@ -7,14 +7,36 @@
 # Default value in the box is the current value if initialized, otherwise blank
 # Blank name values need to be handled by other functions
 make_INT_name_ui <- function(input){
-  lapply(1:input$n_INT,
-         function(i){
-           textInput(
-             inputId = paste0("INT_name_", i),
-             label = paste0("Name of intervention ", i),
-             value = ifelse(is.null(input[[paste0("INT_name_", i)]]),
-                            "",
-                            input[[paste0("INT_name_", i)]]))})
+  c(lapply(
+    1:input$n_INT,
+    function(i){
+      row <- list(
+        tags$u(strong(paste0("Name of intervention ", i))),
+        textInput(
+          inputId = paste0("INT_name_", i),
+          label = NULL,
+          value = ifelse(is.null(input[[paste0("INT_name_", i)]]),
+                         "",
+                         input[[paste0("INT_name_", i)]])))
+      if(!is.null(input$INT_h2h) && input$INT_h2h){
+        row <- append(
+          row, 
+          list(textInput(
+            inputId = paste0("INT_", i, "_h2h_name"),
+            label = "Versus",
+            value = ifelse(is.null(input[[paste0("INT_", i, "_h2h_name")]]),
+                           "",
+                           input[[paste0("INT_", i, "_h2h_name")]]))))
+      }
+      return(row)
+    }),
+    list(checkboxInput(
+      inputId = "INT_h2h",
+      label = "Allow Head-to-Head Interventions?",
+      value = ifelse(is.null(input$INT_h2h),
+                     FALSE,
+                     input$INT_h2h)))
+  )
 }
 
 # Create intervention timing tabs -----------------------------------------------

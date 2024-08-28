@@ -7,7 +7,7 @@
 #   configuration for each intervention
 basic_study_config <- function(input){
   cross_join(data.frame(COH = 1:input$n_COH),
-             data.frame(INT = 1:input$n_INT,
+             data.frame(INT = as.character(1:input$n_INT),
                # Need to iterate through all intervention lengths
                INT_length = sapply(
                  1:input$n_INT, 

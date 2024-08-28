@@ -8,7 +8,7 @@
 #   Ultimate caller of plotting function contained in 8_make_plot.R
 
 server <- function(input, output){
-  # Tab Functionality ==========================================================
+  # Tab Functionality/Observers ==========================================================
   ## --- Next ---
   observeEvent(input$tab1_next, {
     updateTabsetPanel(inputId = "input_tabs", selected = "tab2")
@@ -45,7 +45,7 @@ server <- function(input, output){
                 select = T)
     }
   })
-  
+
   # Dynamic UI Elements ========================================================
   # Functions to create UI elements are in 2_dynamic_ui.R. Reactive elements 
   #   only contain decisions on when the UI should be updated
@@ -54,6 +54,10 @@ server <- function(input, output){
   output$INT_names <- renderUI({
     # Isolated values will only be recalculated if the tab changes
     input$input_tabs
+    # If h2h button has been initialized, redraw when it is updated
+    if(!is.null(input$INT_h2h)){
+      input$INT_h2h
+    }
     if(is.na(input$n_INT) || input$n_INT<1){
       return(helpText("Number of interventions is invalid"))
     }
@@ -149,6 +153,7 @@ server <- function(input, output){
   viz_options <- reactive({
     # List containing options to send to make_plot()
     option_list = list()
+    ## --- Conditional add ---
     # Add cohort names if initialized
     if(input$advanced_COH) {
       option_list <- append(option_list,
@@ -160,6 +165,27 @@ server <- function(input, output){
                                        input[[paste0("COH_name_", i)]])
                               })))
     }
+    # Add head to head configuration if selected
+    if(!is.null(input$INT_h2h) && input$INT_h2h){
+      h2h_df <- data.frame()
+      for (i in 1:input$n_INT){
+        if(is.null(input[[paste0("INT_", i, "_h2h_name")]]) ||
+           input[[paste0("INT_", i, "_h2h_name")]]==""){
+          next
+        }
+        h2h_df <- h2h_df %>%
+          bind_rows(data.frame(INT = as.character(i),
+                               h2h_name = input[[paste0("INT_", i, "_h2h_name")]]))
+      }
+      
+      # Only actually add to config if there are named INTs
+      if(nrow(h2h_df)>0){
+        option_list <- append(option_list,
+                              list(h2h = TRUE,
+                                   h2h_df = h2h_df))
+      }
+    }
+    ## --- Always add ---
     # Add intervention names
     option_list <- append(option_list,
                           list(INT_names = sapply(

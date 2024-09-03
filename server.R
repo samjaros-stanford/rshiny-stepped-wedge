@@ -52,8 +52,9 @@ server <- function(input, output){
   ## --- Intervention Naming ---
   ## Creates a number of text inputs equal to the number of interventions
   output$INT_names <- renderUI({
-    # Isolated values will only be recalculated if the tab changes
+    # Isolated values will only be recalculated if the number of INT or tab changes
     input$input_tabs
+    input$n_INT
     # If h2h button has been initialized, redraw when it is updated
     if(!is.null(input$INT_h2h)){
       input$INT_h2h
@@ -66,11 +67,14 @@ server <- function(input, output){
   ## --- Intervention Timing ---
   ## Creates a number of duration inputs equal to the number of interventions
   output$INT_timings <- renderUI({
-    # Isolated values will only be recalculated if the tab or number changes
-    input$input_tabs
+    # Check if it should be drawn at all
     if(is.na(input$n_INT) || input$n_INT<1){
       return(helpText("Number of interventions is invalid"))
     }
+    # Isolated values will only be recalculated if the tab or number changes
+    input$input_tabs
+    input$n_INT
+    # Generate intervention timings
     c(isolate(make_INT_timing_ui(input)),
       list(
         numericInput(

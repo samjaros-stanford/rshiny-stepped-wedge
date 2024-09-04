@@ -53,8 +53,8 @@ server <- function(input, output){
   ## Creates a number of text inputs equal to the number of interventions
   output$INT_names <- renderUI({
     # Isolated values will only be recalculated if the number of INT or tab changes
-    input$input_tabs
     input$n_INT
+    input$input_tabs
     # If h2h button has been initialized, redraw when it is updated
     if(!is.null(input$INT_h2h)){
       input$INT_h2h
@@ -160,14 +160,16 @@ server <- function(input, output){
     ## --- Conditional add ---
     # Add cohort names if initialized
     if(input$advanced_COH) {
-      option_list <- append(option_list,
-                            list(COH_names = sapply(
-                              1:input$n_COH, 
-                              function(i){
-                                ifelse(input[[paste0("COH_name_", i)]] == "",
-                                       paste0("Cohort ", i),
-                                       input[[paste0("COH_name_", i)]])
-                              })))
+      option_list <- append(
+        option_list,
+        list(COH_names = sapply(
+          1:input$n_COH, 
+          function(i){
+            ifelse(is.null(input[[paste0("COH_name_", i)]]) || 
+                     input[[paste0("COH_name_", i)]] == "",
+                   paste0("Cohort ", i),
+                   input[[paste0("COH_name_", i)]])
+      })))
     }
     # Add head to head configuration if selected
     if(!is.null(input$INT_h2h) && input$INT_h2h){
@@ -191,14 +193,16 @@ server <- function(input, output){
     }
     ## --- Always add ---
     # Add intervention names
-    option_list <- append(option_list,
-                          list(INT_names = sapply(
-                            1:input$n_INT,
-                            function(i){
-                              ifelse(input[[paste0("INT_name_", i)]] == "",
-                                     paste0("Intervention ", i),
-                                     input[[paste0("INT_name_", i)]])
-                            })))
+    option_list <- append(
+      option_list,
+      list(INT_names = sapply(
+        1:input$n_INT,
+        function(i){
+          ifelse(is.null(input[[paste0("INT_name_", i)]]) ||
+                   input[[paste0("INT_name_", i)]] == "",
+                 paste0("Intervention ", i),
+                 input[[paste0("INT_name_", i)]])
+    })))
     # Add timing unit
     if(input$time_units!="") {
       option_list <- append(option_list,
@@ -217,7 +221,7 @@ server <- function(input, output){
     make_plot(study(), viz_options())
   })
   
-  # Optional Testing Outputs ===================================================
+  # Debugging Outputs ===================================================
   # Returns a text of all input values
   output$input_list <- renderText({
     # Check if this is wanted

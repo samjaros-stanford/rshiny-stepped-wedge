@@ -14,11 +14,11 @@ make_plot <- function(study, args=list()){
   )
   # Take input and update defaults
   viz_args = modifyList(default_args, args)
-  
+
   # Add names and order study data frame =======================================
   # Add INT names, set standard column width, and arrange
   study_named <- study %>%
-    left_join(data.frame(INT = as.character(1:max(study$INT)),
+    left_join(data.frame(INT = as.character(1:length(viz_args$INT_names)),
                          INT_name = viz_args$INT_names),
               by=join_by("INT")) %>%
     mutate(col_min = COH-0.1,

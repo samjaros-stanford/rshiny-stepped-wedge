@@ -12,13 +12,17 @@ basic_study_config <- function(input){
                INT_length = sapply(
                  1:input$n_INT, 
                  function(i){
-                   input[[paste0("INT_length_",i)]]
+                   ifelse(is.null(input[[paste0("INT_length_",i)]]),
+                          default$study$INT_length,
+                          input[[paste0("INT_length_",i)]])
                  }),
                # Need to iterate through all intervention gaps
                INT_gap = sapply(
                  1:input$n_INT, 
                  function(i){
-                   input[[paste0("INT_gap_",i)]]
+                   ifelse(is.null(input[[paste0("INT_gap_",i)]]),
+                          default$study$INT_gap,
+                          input[[paste0("INT_gap_",i)]])
                  }),
                # Offset has special case where if it is completely uninitialized,
                #   it needs to be 0/NA so that a phantom study is not created.

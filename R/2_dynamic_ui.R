@@ -7,14 +7,36 @@
 # Default value in the box is the current value if initialized, otherwise blank
 # Blank name values need to be handled by other functions
 make_INT_name_ui <- function(input){
-  lapply(1:input$n_INT,
-         function(i){
-           textInput(
-             inputId = paste0("INT_name_", i),
-             label = paste0("Name of intervention ", i),
-             value = ifelse(is.null(input[[paste0("INT_name_", i)]]),
-                            "",
-                            input[[paste0("INT_name_", i)]]))})
+  c(lapply(
+    1:input$n_INT,
+    function(i){
+      row <- list(
+        tags$u(strong(paste0("Name of intervention ", i))),
+        textInput(
+          inputId = paste0("INT_name_", i),
+          label = NULL,
+          value = ifelse(is.null(input[[paste0("INT_name_", i)]]),
+                         "",
+                         input[[paste0("INT_name_", i)]])))
+      if(!is.null(input$INT_h2h) && input$INT_h2h){
+        row <- append(
+          row, 
+          list(textInput(
+            inputId = paste0("INT_", i, "_h2h_name"),
+            label = "Versus",
+            value = ifelse(is.null(input[[paste0("INT_", i, "_h2h_name")]]),
+                           "",
+                           input[[paste0("INT_", i, "_h2h_name")]]))))
+      }
+      return(row)
+    }),
+    list(checkboxInput(
+      inputId = "INT_h2h",
+      label = "Allow Head-to-Head Interventions?",
+      value = ifelse(is.null(input$INT_h2h),
+                     FALSE,
+                     input$INT_h2h)))
+  )
 }
 
 # Create intervention timing tabs -----------------------------------------------
@@ -230,22 +252,45 @@ make_INT_timing_by_COH_ui <- function(COH_id, input){
 
 # Create cohort customization tabs ---------------------------------------------
 make_COH_customization_tab_ui <- function(COH_id, input){
-  # Setup lists of interventions for the bucket_list
-  # First initialization just uses
+  # Setup bucket_list ==========================================================
+  # First initialization just uses all interventions as included
   if(is.null(input[[paste0("COH_bucket_group_", COH_id)]])){
-    included_INT <- lapply(1:input$n_INT, 
-                           function(x){input[[paste0("INT_name_",x)]]})
-    names(included_INT) <- 1:input$n_INT
-    excluded_INT <- NULL
+    incl_INT_names <- lapply(1:input$n_INT, 
+                             function(x){input[[paste0("INT_name_",x)]]})
+    names(incl_INT_names) <- 1:input$n_INT
+    excl_INT_names <- NULL
   } else {
-    included_INT <- lapply(input[[paste0("COH_INT_incl_order_", COH_id)]], 
-                           function(x){input[[paste0("INT_name_",x)]]})
-    names(included_INT) <- input[[paste0("COH_INT_incl_order_", COH_id)]]
-    excluded_INT <- lapply(input[[paste0("COH_INT_excl_order_", COH_id)]], 
-                           function(x){input[[paste0("INT_name_",x)]]})
-    names(excluded_INT) <- input[[paste0("COH_INT_excl_order_", COH_id)]]
+  # All subsequent runs need to check to see if the intervention number has
+  #   changed to see if the interventions are still eligible and if interventions
+  #   need to be added
+    # --- Excluded interventions ---
+    existing_excl_INT <- input[[paste0("COH_INT_excl_order_", COH_id)]]
+    excl_INT <- existing_excl_INT[existing_excl_INT %in% 1:input$n_INT]
+    
+    # Get names in format required by bucket
+    excl_INT_names <- lapply(excl_INT,
+                             function(x){input[[paste0("INT_name_",x)]]})
+    names(excl_INT_names) <- excl_INT
+    # --- Included interventions ---
+    existing_incl_INT <- input[[paste0("COH_INT_incl_order_", COH_id)]]
+    incl_INT <- existing_incl_INT[existing_incl_INT %in% 1:input$n_INT]
+    
+    # Add missing interventions to the end of included
+    # if(length(excl_INT) + length(incl_INT) == input$n_INT){
+    #   missing_INTs <- NULL
+    # } else {
+    #   browser()
+    #   missing_INTs <- 1:input$n_INT[!(1:input$n_INT %in% c(excl_INT, incl_INT))] 
+    # }
+    missing_INTs <- (1:input$n_INT)[!(1:input$n_INT %in% c(excl_INT, incl_INT))] 
+    incl_INT <- c(incl_INT, missing_INTs)
+    
+    # Get names in format required by bucket
+    incl_INT_names <- lapply(incl_INT, 
+                             function(x){input[[paste0("INT_name_",x)]]})
+    names(incl_INT_names) <- incl_INT
   }
-  
+
   # Create tabPanel
   tabPanel(
     title = COH_id,
@@ -264,12 +309,12 @@ make_COH_customization_tab_ui <- function(COH_id, input){
       orientation = "vertical",
       add_rank_list(
         text = NULL,
-        labels = included_INT,
+        labels = incl_INT_names,
         input_id = paste0("COH_INT_incl_order_", COH_id)
       ),
       add_rank_list(
         text = "Excluded from this cohort",
-        labels = excluded_INT,
+        labels = excl_INT_names,
         input_id = paste0("COH_INT_excl_order_", COH_id)
       )
     ),

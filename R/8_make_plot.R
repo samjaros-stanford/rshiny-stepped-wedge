@@ -4,28 +4,69 @@
 # Create stepwise wedge study plot given study specification in long format
 #
 make_plot <- function(study, args=list()){
-  # Default plotting options
+  # Plotting options ===========================================================
+  # Defaults
   default_args = list(
     COH_names = paste("Cohort", 1:max(study$COH)),
     INT_names = paste("Intervention", 1:max(study$INT)),
-    time_units = "Time"
+    time_units = "Time",
+    h2h = FALSE
   )
-  
   # Take input and update defaults
   viz_args = modifyList(default_args, args)
+
+  # Add names and order study data frame =======================================
+  # Add INT names, set standard column width, and arrange
+  study_named <- study %>%
+    left_join(data.frame(INT = as.character(1:length(viz_args$INT_names)),
+                         INT_name = viz_args$INT_names),
+              by=join_by("INT")) %>%
+    mutate(col_min = COH-0.1,
+           col_max = COH+0.1) %>%
+    arrange(COH, INT_start) %>%
+    mutate(is_h2h = F)
   
-  # Create plot
-  ggplot(data = study, aes(y=factor(COH), color=factor(INT))) +
-    geom_segment(aes(x=INT_start, xend=INT_end), linewidth=12) +
-    scale_color_brewer(name=NULL, 
-                       palette="Set1",
-                       breaks = 1:length(viz_args$INT_names),
-                       labels = viz_args$INT_names) +
-    scale_x_continuous(viz_args$time_units, breaks=scales::breaks_pretty()) +
-    scale_y_discrete("Cohort", 
-                     breaks = 1:length(viz_args$COH_names), 
-                     labels = viz_args$COH_names,
-                     limits = rev) +
+  # Add h2h INTs, if needed
+  if(viz_args$h2h){
+    all_INTs <- study_named %>%
+      left_join(viz_args$h2h_df, by=join_by(INT)) %>%
+      filter(!is.na(h2h_name)) %>%
+      mutate(INT_name = h2h_name,
+             col_min = COH) %>%
+      bind_rows(study_named) %>%
+      arrange(COH, INT_start, !is.na(h2h_name))
+    
+    unique_INTs <- unique(all_INTs$INT_name)
+
+    study_named <- all_INTs %>%
+      group_by(COH, INT_start) %>%
+      mutate(is_h2h = !is.na(h2h_name)) %>%
+      ungroup()
+  } else {
+    h2h_INTs <- NULL
+    unique_INTs <- unique(study_named$INT_name)
+  }
+
+  # Create plot ================================================================
+  ggplot(mapping=aes(ymin=INT_start, ymax=INT_end, xmin=col_min, xmax=col_max,
+                     fill=factor(INT_name))) +
+    # Draw full height lines as rectangles
+    geom_rect(data=filter(study_named, !is_h2h)) +
+    # Draw half lines for head-to-heads
+    geom_rect(data=filter(study_named, is_h2h),
+              position=position_dodge2(padding=0, reverse=T)) +
+    # Scale axes & fill
+    scale_fill_brewer(name = NULL, 
+                      palette = "Set1",
+                      breaks = unique_INTs) +
+    scale_y_continuous(viz_args$time_units, breaks=scales::breaks_pretty()) +
+    scale_x_continuous("Cohort", 
+                       breaks=1:max(study_named$COH),
+                       labels = viz_args$COH_names,
+                       transform = "reverse") +
+    # Draw plot in wrong orientation to use position_dodge2, then flip
+    coord_flip() +
+    # Theming
     theme_classic() +
     theme(text = element_text(size = 16),
           legend.position = "bottom",

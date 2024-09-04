@@ -7,18 +7,22 @@
 #   configuration for each intervention
 basic_study_config <- function(input){
   cross_join(data.frame(COH = 1:input$n_COH),
-             data.frame(INT = 1:input$n_INT,
+             data.frame(INT = as.character(1:input$n_INT),
                # Need to iterate through all intervention lengths
                INT_length = sapply(
                  1:input$n_INT, 
                  function(i){
-                   input[[paste0("INT_length_",i)]]
+                   ifelse(is.null(input[[paste0("INT_length_",i)]]),
+                          default$study$INT_length,
+                          input[[paste0("INT_length_",i)]])
                  }),
                # Need to iterate through all intervention gaps
                INT_gap = sapply(
                  1:input$n_INT, 
                  function(i){
-                   input[[paste0("INT_gap_",i)]]
+                   ifelse(is.null(input[[paste0("INT_gap_",i)]]),
+                          default$study$INT_gap,
+                          input[[paste0("INT_gap_",i)]])
                  }),
                # Offset has special case where if it is completely uninitialized,
                #   it needs to be 0/NA so that a phantom study is not created.
@@ -47,7 +51,7 @@ custom_study_config <- function(input){
   #   for the UI to be loaded. Checks for presence of input buckets and timing
   for(i in 1:input$n_COH){
     if(is.null(input[[paste0("COH_INT_incl_order_", i)]]) || 
-       is.null(input[[paste0("INT_start_max_COH_", i)]])){
+       is.null(input[[paste0("INT_length_",input$n_INT,"_COH_",i)]])){
       return(NULL)
     }
     # If this cohort has no interventions, continue to the next cohort
@@ -62,11 +66,13 @@ custom_study_config <- function(input){
   config <- config %>%
     rowwise() %>%
     mutate(INT_length = 
-             if_else(is.na(input[[paste0("INT_length_",INT,"_COH_",COH)]]),
+             if_else(is.null(input[[paste0("INT_length_",INT,"_COH_",COH)]]) ||
+                       is.na(input[[paste0("INT_length_",INT,"_COH_",COH)]]),
                      input[[paste0("INT_length_",INT)]],
                      input[[paste0("INT_length_",INT,"_COH_",COH)]]),
            INT_gap = 
-             if_else(is.na(input[[paste0("INT_gap_",INT,"_COH_",COH)]]),
+             if_else(is.null(input[[paste0("INT_gap_",INT,"_COH_",COH)]]) ||
+                       is.na(input[[paste0("INT_gap_",INT,"_COH_",COH)]]),
                      input[[paste0("INT_gap_",INT)]],
                      input[[paste0("INT_gap_",INT,"_COH_",COH)]]),
            INT_offset = input$INT_offset,

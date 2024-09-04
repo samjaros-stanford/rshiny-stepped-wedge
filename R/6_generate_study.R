@@ -66,11 +66,13 @@ custom_study_config <- function(input){
   config <- config %>%
     rowwise() %>%
     mutate(INT_length = 
-             if_else(is.na(input[[paste0("INT_length_",INT,"_COH_",COH)]]),
+             if_else(is.null(input[[paste0("INT_length_",INT,"_COH_",COH)]]) ||
+                       is.na(input[[paste0("INT_length_",INT,"_COH_",COH)]]),
                      input[[paste0("INT_length_",INT)]],
                      input[[paste0("INT_length_",INT,"_COH_",COH)]]),
            INT_gap = 
-             if_else(is.na(input[[paste0("INT_gap_",INT,"_COH_",COH)]]),
+             if_else(is.null(input[[paste0("INT_gap_",INT,"_COH_",COH)]]) ||
+                       is.na(input[[paste0("INT_gap_",INT,"_COH_",COH)]]),
                      input[[paste0("INT_gap_",INT)]],
                      input[[paste0("INT_gap_",INT,"_COH_",COH)]]),
            INT_offset = input$INT_offset,

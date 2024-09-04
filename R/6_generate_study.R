@@ -51,6 +51,7 @@ custom_study_config <- function(input){
   #   for the UI to be loaded. Checks for presence of input buckets and timing
   for(i in 1:input$n_COH){
     if(is.null(input[[paste0("COH_INT_incl_order_", i)]]) || 
+       is.null(input[[paste0("INT_length_",input$n_INT)]]) ||
        is.null(input[[paste0("INT_length_",input$n_INT,"_COH_",i)]])){
       return(NULL)
     }

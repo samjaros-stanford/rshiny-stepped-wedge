@@ -130,6 +130,7 @@ server <- function(input, output){
     # Explicit update when the interventions change
     input$n_INT
     input$n_COH
+    input$input_tabs
     # If the by cohort tabs are uninitialized, use basic config
     if(is.null(input$COH_tabs)){
       basic_study_config(input)

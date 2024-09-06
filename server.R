@@ -118,6 +118,35 @@ server <- function(input, output){
     ))
   })
   
+  # Dynamic Intervention Naming ================================================
+  # Intervention naming depends on several factors
+  # These reactives will take care of the decisions needed to output the names
+  # Returns a list up to the maximum number of interventions allowed
+  INT_names <<- reactive({
+    sapply(1:max_n_INT,
+           function(i){
+             # If name input is uninitialized, return default
+             if(is.null(input[[paste0("INT_name_", i)]])){
+               return(paste0("Intervention ", i))
+             }
+             # Decide name of initial intervention
+             # If input is null or blank, use default value Intervention #
+             if(is.na(input[[paste0("INT_name_", i)]]) ||
+                input[[paste0("INT_name_", i)]] == ""){
+               name <- paste0("Intervention ", i)
+             } else {
+               name <- input[[paste0("INT_name_", i)]]
+             }
+             # Decide if h2h needs to be added
+             if(!is.null(input$INT_h2h) && input$INT_h2h &&
+                !is.null(input[[paste0("INT_", i, "_h2h_name")]]) &&
+                !is.na(input[[paste0("INT_", i, "_h2h_name")]]) &&
+                input[[paste0("INT_", i, "_h2h_name")]] != ""){
+               name <- paste0(name, " vs. ", input[[paste0("INT_", i, "_h2h_name")]])
+             }
+             return(name)
+           })
+  })
   # Study Creation =============================================================
   ## --- Create study configuration ---
   ## Assemble inputs into the format needed for study assembly
@@ -195,14 +224,14 @@ server <- function(input, output){
     # Add intervention names
     option_list <- append(
       option_list,
-      list(INT_names = sapply(
-        1:input$n_INT,
-        function(i){
-          ifelse(is.null(input[[paste0("INT_name_", i)]]) ||
-                   input[[paste0("INT_name_", i)]] == "",
-                 paste0("Intervention ", i),
-                 input[[paste0("INT_name_", i)]])
-    })))
+      list(INT_names = sapply(1:input$n_INT,
+                              function(i){
+                                ifelse(is.null(input[[paste0("INT_name_", i)]]) ||
+                                         is.na(input[[paste0("INT_name_", i)]]) ||
+                                         input[[paste0("INT_name_", i)]]=="",
+                                       paste0("Intervention ", i),
+                                       input[[paste0("INT_name_", i)]])
+                              })))
     # Add timing unit
     if(input$time_units!="") {
       option_list <- append(option_list,

@@ -44,9 +44,7 @@ make_INT_name_ui <- function(input){
 make_INT_timing_ui <- function(input){
   INT_timing_ui <- list(
     # Heading for first intervention
-    tags$u(strong(ifelse(input$INT_name_1 == "",
-                         paste0("Intervention 1"),
-                         input$INT_name_1))),
+    tags$u(strong(INT_names()[1])),
     # First intervention specs require gap, minimum, and maximum
     fluidRow(
       column(width = 4,
@@ -80,9 +78,7 @@ make_INT_timing_ui <- function(input){
         2:(input$n_INT - 1),
         function(i){
           list(
-            tags$u(strong(ifelse(input[[paste0("INT_name_", i)]] == "",
-                                 paste0("Intervention ", i),
-                                 input[[paste0("INT_name_", i)]]))),
+            tags$u(strong(INT_names()[i])),
             fluidRow(
               column(
                 width = 6,
@@ -106,9 +102,7 @@ make_INT_timing_ui <- function(input){
   if(input$n_INT>1){
     INT_timing_ui <- c(
       INT_timing_ui,
-      list(tags$u(strong(ifelse(input[[paste0("INT_name_", input$n_INT)]] == "",
-                                paste0("Intervention ", input$n_INT),
-                                input[[paste0("INT_name_", input$n_INT)]]))),
+      list(tags$u(strong(INT_names()[input$n_INT])),
            fluidRow(
              column(
                width = 4,
@@ -156,9 +150,7 @@ make_INT_timing_by_COH_ui <- function(COH_id, input){
   i <- INT_order[1]
   INT_timing_ui <- list(
     # Heading for first intervention
-    tags$u(strong(ifelse(input[[paste0("INT_name_", i)]] == "",
-                         paste0("Intervention ", i),
-                         input[[paste0("INT_name_", i)]]))),
+    tags$u(strong(INT_names()[1])),
     # First intervention specs require gap, minimum, and maximum
     fluidRow(
       column(width = 4,
@@ -194,9 +186,7 @@ make_INT_timing_by_COH_ui <- function(COH_id, input){
         middle_INTs,
         function(i){
           list(
-            tags$u(strong(ifelse(input[[paste0("INT_name_", i)]] == "",
-                                 paste0("Intervention ", i),
-                                 input[[paste0("INT_name_", i)]]))),
+            tags$u(strong(INT_names()[as.numeric(i)])),
             fluidRow(
               column(width = 6,
                      numericInput(
@@ -220,9 +210,7 @@ make_INT_timing_by_COH_ui <- function(COH_id, input){
     INT_timing_ui <- c(
       INT_timing_ui,
       list(
-        tags$u(strong(ifelse(input[[paste0("INT_name_", i)]] == "",
-                             paste0("Intervention ", i),
-                             input[[paste0("INT_name_", i)]]))),
+        tags$u(strong(INT_names()[as.numeric(i)])),
         # First intervention specs require gap, minimum, and maximum
         fluidRow(
           column(width = 4,
@@ -255,8 +243,7 @@ make_COH_customization_tab_ui <- function(COH_id, input){
   # Setup bucket_list ==========================================================
   # First initialization just uses all interventions as included
   if(is.null(input[[paste0("COH_bucket_group_", COH_id)]])){
-    incl_INT_names <- lapply(1:input$n_INT, 
-                             function(x){input[[paste0("INT_name_",x)]]})
+    incl_INT_names <- INT_names()[1:input$n_INT]
     names(incl_INT_names) <- 1:input$n_INT
     excl_INT_names <- NULL
   } else {
@@ -268,26 +255,18 @@ make_COH_customization_tab_ui <- function(COH_id, input){
     excl_INT <- existing_excl_INT[existing_excl_INT %in% 1:input$n_INT]
     
     # Get names in format required by bucket
-    excl_INT_names <- lapply(excl_INT,
-                             function(x){input[[paste0("INT_name_",x)]]})
+    excl_INT_names <- INT_names()[as.numeric(excl_INT)]
     names(excl_INT_names) <- excl_INT
     # --- Included interventions ---
     existing_incl_INT <- input[[paste0("COH_INT_incl_order_", COH_id)]]
     incl_INT <- existing_incl_INT[existing_incl_INT %in% 1:input$n_INT]
     
     # Add missing interventions to the end of included
-    # if(length(excl_INT) + length(incl_INT) == input$n_INT){
-    #   missing_INTs <- NULL
-    # } else {
-    #   browser()
-    #   missing_INTs <- 1:input$n_INT[!(1:input$n_INT %in% c(excl_INT, incl_INT))] 
-    # }
     missing_INTs <- (1:input$n_INT)[!(1:input$n_INT %in% c(excl_INT, incl_INT))] 
     incl_INT <- c(incl_INT, missing_INTs)
     
     # Get names in format required by bucket
-    incl_INT_names <- lapply(incl_INT, 
-                             function(x){input[[paste0("INT_name_",x)]]})
+    incl_INT_names <- INT_names()[as.numeric(incl_INT)]
     names(incl_INT_names) <- incl_INT
   }
 

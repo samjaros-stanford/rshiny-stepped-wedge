@@ -132,6 +132,7 @@ sidebar <- sidebarPanel(tabs)
 
 ## Main =========================================================================
 main <- mainPanel(
+  textOutput("plot_help"),
   plotOutput("plot"),
   # --- For testing ---
   tableOutput("config"),

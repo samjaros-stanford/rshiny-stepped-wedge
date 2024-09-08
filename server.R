@@ -242,12 +242,20 @@ server <- function(input, output){
   })
   ## Create plot using the assembled study and plotting options
   output$plot <- renderPlot({
-    # Fail states
+    # Debugging or if study cannot be made
     if(suppress.plot || is.null(study())){
       return(NULL)
     }
     # Call plotting
     make_plot(study(), viz_options())
+  })
+  ## Plotting help text
+  output$plot_help <- renderText({
+    if(!suppress.plot && is.null(study())){
+      "Click through the tabs to create a study visualization."
+    } else {
+      NULL
+    }
   })
   
   # Debugging Outputs ===================================================

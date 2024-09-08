@@ -49,7 +49,7 @@ tab1 <- tabPanel(
            this tab if you need to add more interventions or cohorts."),
   numericInput(
     inputId = "n_INT",
-    label = "How many interventions in your study?",
+    label = "How many interventions in your study? (Max 16)",
     value = default$study$n_INT,
     min = 1,
     max = 16,
@@ -57,7 +57,7 @@ tab1 <- tabPanel(
   ),
   numericInput(
     inputId = "n_COH",
-    label = "How many cohorts are your study?",
+    label = "How many cohorts are your study? (Max 16)",
     value = default$study$n_COH,
     min = 1,
     max = 32,
@@ -132,6 +132,7 @@ sidebar <- sidebarPanel(tabs)
 
 ## Main =========================================================================
 main <- mainPanel(
+  textOutput("plot_help"),
   plotOutput("plot"),
   # --- For testing ---
   tableOutput("config"),

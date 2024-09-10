@@ -10,7 +10,7 @@ library(sortable)
 # Page title
 page_title = "Stepped Wedge Trial Emulator"
 # Define the maximum number of interventions and cohorts possible
-max_n_INT = 16
+max_n_INT = 8
 max_n_COH = 16
 ## Change what is outputted for debugging purposes
 ## In normal operations, these should all be FALSE
@@ -30,10 +30,12 @@ default$study$n_COH = NA_integer_
 default$study$time_units = ""
 default$study$COH_units = "Group"
 default$study$INT_length = 1
-default$study$INT_start_max = Inf
-default$study$INT_end_max = Inf
+default$study$INT_start_max = 1
+default$study$INT_end_max = 1
 default$study$INT_gap = 0
 default$study$INT_null_offset = NA # When offset is uninitialized, prevents phantom study from being generated
 default$study$INT_offset = 1
 
 # Default values for visualization setup
+default$plot$colors <- c("#332288","#88CCEE","#44AA99","#117733","#999933",
+                         "#DDCC77","#CC6677","#882255","#AA4499","#DDDDDD")

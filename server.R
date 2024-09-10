@@ -75,14 +75,14 @@ server <- function(input, output){
     input$input_tabs
     input$n_INT
     # Generate intervention timings
-    c(isolate(make_INT_timing_ui(input)),
-      list(
+    c(list(
         numericInput(
           inputId = "INT_offset",
           label = "Intervention Offset Between Groups",
           value = ifelse(is.null(input$INT_offset),
                          default$study$INT_offset,
-                         input$INT_offset))))
+                         input$INT_offset))),
+      isolate(make_INT_timing_ui(input)))
   })
   ## --- Cohort Customizations ---
   ## Generates the cohort customization tabset

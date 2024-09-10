@@ -1,6 +1,20 @@
 ################################################################################
-#
-# Make plot
+# Functions related to the creation of the stepwise plot
+
+# Generate colors --------------------------------------------------------------
+generate_colors <- function(n_needed, pallete=default$plot$colors){
+  # Fallback is to use Paired color pallete from RColorBrewer
+  # It is colorblind friendly and has the most colors
+  if(n_needed > length(pallete)){
+    return(RColorBrewer::brewer.pal(n_needed, "Paired"))
+  }
+  # Calculate indices by multiplying the gap between colors by 0 to the number of
+  # colors needed minus one. Add one to the end because R uses 1 indexing because
+  # it is dumb and bad. For example, 2 colors will be 1 and 6.
+  return(pallete[round((0:(n_needed-1))*(length(pallete)/n_needed))+1])
+}
+
+# Make plot --------------------------------------------------------------------
 # Create stepwise wedge study plot given study specification in long format
 #
 make_plot <- function(study, args=list()){
@@ -56,8 +70,8 @@ make_plot <- function(study, args=list()){
     geom_rect(data=filter(study_named, is_h2h),
               position=position_dodge2(padding=0, reverse=T)) +
     # Scale axes & fill
-    scale_fill_brewer(name = NULL, 
-                      palette = "Set1",
+    scale_fill_manual(name = NULL, 
+                      values = generate_colors(length(unique_INTs)),
                       breaks = unique_INTs) +
     scale_y_continuous(viz_args$time_units, breaks=scales::breaks_pretty()) +
     scale_x_continuous("Cohort", 
